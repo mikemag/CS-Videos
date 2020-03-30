@@ -149,9 +149,7 @@ class CodeBlock(VGroup):
     def __init__(self, language, raw_code_string, **kwargs):
         digest_config(self, kwargs, locals())
         super().__init__(**kwargs)
-
-        self.return_highlight = None
-
+        self.callsite_highlight = None
         code_string = CodeTextString(language, raw_code_string)
         highlight_rect = code_string.get_line_highlight_rect(1).set_opacity(0)
         hrg = VGroup(highlight_rect)
@@ -160,8 +158,11 @@ class CodeBlock(VGroup):
     def code_string(self):
         return self[0]
 
+    def __highlight_rect_group(self):
+        return self[1]
+
     def highlight_rect(self):
-        return self[1][0]
+        return self.__highlight_rect_group()[0]
 
     def highlight_lines(self, lines, color=YELLOW):
         if isinstance(lines, tuple):
@@ -171,33 +172,50 @@ class CodeBlock(VGroup):
         self.highlight_rect().become(r)
         return self
 
-    # Make our highlight the same as the caller's current highlight
-    def setup_for_call(self, caller):
-        self[1].remove(self.highlight_rect())
-        self[1].add(caller.highlight_rect().copy())
-
-    def show_caller(self):
-        self.highlight_rect().set_color(WHITE)
-        return self
-
-    def show_callee(self):
-        return self.highlight_lines(1)
-
-    # Remember our current highlight, then switch to the callee's current highlight.
-    def setup_for_return(self, callee):
-        self.return_highlight = self.highlight_rect()
-        # self[1].remove(self.highlight_rect())
-        self[1].add(callee.highlight_rect().copy())
-
-    def show_returner(self):
+    def fade_out_highlight(self):
         self.highlight_rect().set_opacity(0)
-        return self
 
-    def show_returnee(self):
-        
+    # Move it without changing it
+    def move_highlight_rect(self, line):
+        self.highlight_rect().move_to(
+            self.code_string().get_line_highlight_rect(line)
+        )
+
+    # Returns a from and to highlight rect, each of which are independent of the code block
+    def setup_for_call(self, callee):
+        hr_from = self.highlight_rect().copy()
+        self.callsite_highlight = self.highlight_rect().copy().set_color(WHITE)
+        self.highlight_rect().set_opacity(0)
+        hr_to = callee.code_string().get_line_highlight_rect(1)
+        return hr_from, hr_to
+
+    def highlight_caller(self):
+        self.highlight_rect().become(self.callsite_highlight)
+
+    def complete_callee(self, hr, scene):
+        scene.remove(hr)
+        self.__highlight_rect_group().remove(self.highlight_rect())
+        self.__highlight_rect_group().add(hr)
+
+    # Returns a from and to highlight rect, each of which are independent of the code block
+    def setup_for_return(self, returnee):
+        hr_from = self.highlight_rect().copy()
+        self.__highlight_rect_group().remove(self.highlight_rect())
+        self.__highlight_rect_group().add(
+            self.code_string().get_line_highlight_rect(1).set_opacity(0))
+        hr_to = returnee.highlight_rect().copy().set_color(YELLOW)
+        return hr_from, hr_to
+
+    def highlight_returnee(self):
+        self.highlight_rect().set_opacity(0)
+
+    def complete_returnee(self, hr, scene):
+        scene.remove(hr)
+        self.__highlight_rect_group().remove(self.highlight_rect())
+        self.__highlight_rect_group().add(hr)
 
 
-class CodeDemo(Scene):
+class CodeBlockDemo(Scene):
     def construct(self):
         c1 = CodeBlock('Java', r"""
             int foo() {
@@ -221,24 +239,60 @@ class CodeDemo(Scene):
         self.play(c1.highlight_lines, 2)
         self.play(c1.highlight_lines, (2, 3))
         self.play(c1.highlight_lines, 3)
+        self.play(c1.fade_out_highlight)
+        c1.move_highlight_rect(2)
         self.play(c1.highlight_lines, 2)
         self.wait()
 
-        c2.setup_for_call(c1)
+        hr_caller, hr_callee = c1.setup_for_call(c2)
         self.play(
-            c1.show_caller,
-            c2.show_callee,
+            c1.highlight_caller,
+            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
         )
+        c2.complete_callee(hr_callee, self)
         self.wait()
 
         self.play(c2.highlight_lines, 2)
         self.play(c2.highlight_lines, 3)
         self.play(c2.highlight_lines, 4)
-        self.play(c2.highlight_lines, 5)
+        self.wait()
+
+        hr_returner, hr_returnee = c2.setup_for_return(c1)
+        self.play(
+            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
+            c1.highlight_returnee,
+        )
+        c1.complete_returnee(hr_returnee, self)
+
+        self.play(c1.highlight_lines, 3)
+
+        # Again...
+        hr_caller, hr_callee = c1.setup_for_call(c2)
+        self.play(
+            c1.highlight_caller,
+            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
+        )
+        c2.complete_callee(hr_callee, self)
+        self.wait()
+
+        self.play(c2.highlight_lines, 2)
+        self.play(c2.highlight_lines, 3)
+        self.play(c2.highlight_lines, 4)
+        self.wait()
+
+        hr_returner, hr_returnee = c2.setup_for_return(c1)
+        self.play(
+            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
+            c1.highlight_returnee,
+        )
+        c1.complete_returnee(hr_returnee, self)
+
+        self.play(c1.highlight_lines, 4)
+
+        self.wait()
 
         self.play(FadeOut(c1), FadeOut(c2))
         self.wait()
-
 
 
 class StackFrame(VGroup):
@@ -323,13 +377,13 @@ class FACStack(Scene):
         high_quality = False
 
         # - Foo calls bar passing some args. Bar does something, returns.
-        foo_code = CodeTextString('Java', r"""
+        foo_code = CodeBlock('Java', r"""
             int foo() {
                 int n = bar(1, 2);
                 return n;
             }
             """).scale(0.75)
-        bar_code = CodeTextString('Java', r"""
+        bar_code = CodeBlock('Java', r"""
             int bar(int x, int y) {
                 int a = x + y;
                 int b = a * 2;
@@ -388,15 +442,16 @@ class FACStack(Scene):
         self.play(FadeOut(t4), FadeIn(t5))
         self.wait()
 
-        foo_l2_active = foo_code.get_line_highlight_rect(2)
+        # foo_l2_active = foo_code.get_line_highlight_rect(2)
         if high_quality:
             self.play(
                 ReplacementTransform(t5, foo_l2_active),
             )
         else:
+            foo_code.move_highlight_rect(2)
             self.play(
                 FadeOut(t5),
-                FadeIn(foo_l2_active),
+                foo_code.highlight_lines, 2,
             )
         self.wait()
 
@@ -405,12 +460,12 @@ class FACStack(Scene):
         foo_vars.add(foo_n_q)
         self.wait()
 
-        foo_l2_inactive = foo_code.get_line_highlight_rect(2, color=WHITE)
-        bar_l1 = bar_code.get_line_highlight_rect(1)
+        hr_caller, hr_callee = foo_code.setup_for_call(bar_code)
         self.play(
-            FadeIn(foo_l2_inactive),
-            ReplacementTransform(foo_l2_active, bar_l1, path_arc=np.pi)
+            foo_code.highlight_caller,
+            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
         )
+        bar_code.complete_callee(hr_callee, self)
         self.wait()
 
         bar_x = TexMobject('1').move_to(bar_vars[0][1], aligned_edge=BOTTOM).shift(UP * 0.1)
@@ -418,36 +473,32 @@ class FACStack(Scene):
         self.play(Write(bar_x), Write(bar_y))
         bar_vars_extras = VGroup()
         bar_vars_extras.add(bar_x, bar_y)
-        bar_l2 = bar_code.get_line_highlight_rect(2)
-        self.play(FadeOut(bar_l1), FadeIn(bar_l2))
+        self.play(bar_code.highlight_lines, 2)
         self.wait()
 
         bar_a = TexMobject('3').move_to(bar_vars[2][1], aligned_edge=BOTTOM).shift(UP * 0.1)
         self.play(Write(bar_a))
         bar_vars_extras.add(bar_a)
-        bar_l3 = bar_code.get_line_highlight_rect(3)
-        self.play(FadeOut(bar_l2), FadeIn(bar_l3))
+        self.play(bar_code.highlight_lines, 3)
         self.wait()
 
         bar_b = TexMobject('6').move_to(bar_vars[3][1], aligned_edge=BOTTOM).shift(UP * 0.1)
         self.play(Write(bar_b))
         bar_vars_extras.add(bar_b)
-        bar_l4 = bar_code.get_line_highlight_rect(4)
-        self.play(FadeOut(bar_l3), FadeIn(bar_l4))
+        self.play(bar_code.highlight_lines, 4)
         self.wait()
 
-        foo_l2_new = foo_code.get_line_highlight_rect(2, color=YELLOW)
+        hr_returner, hr_returnee = bar_code.setup_for_return(foo_code)
         self.play(
-            ReplacementTransform(bar_l4, foo_l2_new, path_arc=-np.pi),
-            FadeOut(foo_l2_inactive),
+            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
+            foo_code.highlight_returnee,
         )
+        foo_code.complete_returnee(hr_returnee, self)
         self.wait()
 
-        foo_l3 = foo_code.get_line_highlight_rect(3)
         foo_n = TexMobject('6').move_to(foo_vars[0][1], aligned_edge=BOTTOM).shift(UP * 0.1)
         self.play(
-            FadeOut(foo_l2_new),
-            FadeIn(foo_l3),
+            foo_code.highlight_lines, 3,
             ReplacementTransform(foo_n_q, foo_n),
         )
         foo_vars.add(foo_n)
@@ -458,7 +509,7 @@ class FACStack(Scene):
         print('Give variables homes')
 
         t1 = TextMobject('So how does the\\\\computer do this?').to_edge(LEFT)
-        self.play(FadeIn(t1), FadeOut(foo_l3))
+        self.play(FadeIn(t1), foo_code.fade_out_highlight)
         self.wait()
 
         t2 = TextMobject('Every variable is stored\\\\someplace in memory').to_edge(LEFT)
@@ -586,26 +637,25 @@ class FACStack(Scene):
         foo_frame = StackFrame('foo()', 2, ['n'])
         foo_frame.to_edge(DOWN)
 
-        foo_l2_active = foo_code.get_line_highlight_rect(2)
-
+        foo_code.move_highlight_rect(2)
         self.play(
             FadeInFromDown(foo_frame),
-            FadeIn(foo_l2_active),
+            foo_code.highlight_lines, 2,
             FadeOut(t3),
         )
         self.wait()
 
-        foo_l2_inactive = foo_code.get_line_highlight_rect(2, color=WHITE)
-        bar_l1 = bar_code.get_line_highlight_rect(1)
         t1 = TextMobject('Calling bar()\\\\pushes a frame').to_edge(LEFT)
         bar_frame = StackFrame('bar(1, 2)', 1, ['x', 'y', 'a', 'b'])
         bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
+        hr_caller, hr_callee = foo_code.setup_for_call(bar_code)
         self.play(
-            FadeIn(foo_l2_inactive),
-            ReplacementTransform(foo_l2_active, bar_l1, path_arc=np.pi),
+            foo_code.highlight_caller,
+            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
             FadeIn(t1),
             FadeInFrom(bar_frame, UP),
         )
+        bar_code.complete_callee(hr_callee, self)
         self.wait()
 
         self.play(
@@ -613,42 +663,41 @@ class FACStack(Scene):
             bar_frame.update_slot, 'y', 2,
             FadeOut(t1),
         )
-        bar_l2 = bar_code.get_line_highlight_rect(2)
-        self.play(FadeOut(bar_l1), FadeIn(bar_l2), bar_frame.set_line, 2)
+        self.play(bar_code.highlight_lines, 2, bar_frame.set_line, 2)
         self.wait()
 
         self.play(bar_frame.update_slot, 'a', 3)
-        bar_l3 = bar_code.get_line_highlight_rect(3)
-        self.play(FadeOut(bar_l2), FadeIn(bar_l3), bar_frame.set_line, 3)
+        self.play(bar_code.highlight_lines, 3, bar_frame.set_line, 3)
         self.wait()
 
         self.play(bar_frame.update_slot, 'b', 6)
-        bar_l4 = bar_code.get_line_highlight_rect(4)
-        self.play(FadeOut(bar_l3), FadeIn(bar_l4), bar_frame.set_line, 4)
+        self.play(bar_code.highlight_lines, 4, bar_frame.set_line, 4)
         self.wait()
 
         t1 = TextMobject("Returning pops\\\\bar's frame").to_edge(LEFT)
-        foo_l2_new = foo_code.get_line_highlight_rect(2, color=YELLOW)
+        hr_returner, hr_returnee = bar_code.setup_for_return(foo_code)
         self.play(
-            ReplacementTransform(bar_l4, foo_l2_new, path_arc=-np.pi),
-            FadeOut(foo_l2_inactive),
+            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
+            foo_code.highlight_returnee,
             Uncreate(bar_frame),
             FadeIn(t1),
         )
+        foo_code.complete_returnee(hr_returnee, self)
         self.wait()
 
-        foo_l3 = foo_code.get_line_highlight_rect(3)
-        foo_l2_new.generate_target().become(foo_l3)  # mmmfixme: also much better
         self.play(
-            MoveToTarget(foo_l2_new),
+            foo_code.highlight_lines, 3,
             foo_frame.set_line, 3,
             foo_frame.update_slot, 'n', 6,
             FadeOut(t1),
         )
         self.wait()
 
+        # self.play(foo_code.fade_out_highlight)
+        # self.wait()
+
         # self.play(FadeOut(bar_frame), FadeOut(foo_frame))
-        self.wait()
+        # self.wait()
 
 
 
