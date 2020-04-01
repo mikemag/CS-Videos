@@ -456,18 +456,29 @@ class StackFrameDemo(Scene):
 
 class FACIntro(Scene):
     def construct(self):
-        t1 = TextMobject('Functions and Call Stacks')
-        t1.scale(1.5).to_edge(TOP)
+        t1 = TextMobject('Background: Call Stacks')
+        t1.scale(1.5).to_edge(UP)
         self.play(ShowCreation(t1))
         self.wait()
 
-        # Why?
-        # * Understand the mechanics behind a function call.
-        # * Helps to better understand pass by reference for languages that support it.
-        # * Helps to better understand passing object references in all languages.
-        # * Helps to better understand recursion.
+        # Background information on call stacks, foundation for other concepts which build upon this.
+        t2 = TextMobject("Learning the basics of the ``call stack'' helps with\\\\many "
+                         'concepts in CS:', alignment='').shift(UP)
+        bl = BulletedList(' pass-by-value vs. pass-by-reference',
+                          ' passing object references',
+                          'recursion',
+                          ' debuggers',
+                          buff=MED_SMALL_BUFF)
+        bl.next_to(t2, DOWN)
+        self.play(FadeInFromDown(t2))
+        self.wait()
+        for l in bl:
+            self.play(FadeInFromDown(l))
+            self.wait()
+        self.wait(duration=2)
 
-        # So let's get to it!
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.wait()
 
 
 class FACStack(Scene):
@@ -505,7 +516,7 @@ class FACStack(Scene):
             ShowCreation(title),
             FadeInFromDown(fbg),
         )
-        self.wait()
+        self.wait(duration=2)
 
         # Let's write down what happens when we run this.
         t2 = TextMobject("Let's run them and write down\\\\"
@@ -524,8 +535,7 @@ class FACStack(Scene):
         title = t3
         self.wait()
 
-        # mmmfixme: First, make a place to write each variable
-        t4 = TextMobject('First, make a place\\\\for each variable')
+        t4 = TextMobject('First, make a place\\\\to write each variable')
         t4.next_to(title, DOWN, buff=LARGE_BUFF).to_edge(LEFT)
         self.play(FadeIn(t4))
         self.wait()
@@ -569,6 +579,7 @@ class FACStack(Scene):
         bar_code.complete_callee(hr_callee, self)
         self.wait()
 
+        # mmmfixme: arrow highlights to lead the eye from code to writing
         bar_x = TexMobject('1').move_to(bar_vars[0][1], aligned_edge=BOTTOM).shift(UP * 0.1)
         bar_y = TexMobject('2').move_to(bar_vars[1][1], aligned_edge=BOTTOM).shift(UP * 0.1)
         self.play(Write(bar_x), Write(bar_y))
@@ -611,7 +622,7 @@ class FACStack(Scene):
 
         t1 = TextMobject('So how does the\\\\computer do this?').to_edge(LEFT)
         self.play(FadeIn(t1), foo_code.fade_out_highlight)
-        self.wait()
+        self.wait(duration=2)
 
         t2 = TextMobject('Every variable is stored\\\\someplace in memory').to_edge(LEFT)
         new_title = TextMobject('Where are variables stored?').to_edge(UP)
@@ -682,7 +693,9 @@ class FACStack(Scene):
         self.play(ReplacementTransform(bar_homes, bar_frame))
         self.wait()
 
-        t5 = TextMobject("They're happy and warm\\\\together!").next_to(t4, DOWN, buff=LARGE_BUFF)
+        # mmmfixme: italics?
+        t5 = TextMobject("They're happy and warm\\\\together!")\
+            .scale(0.75).next_to(t4, DOWN, buff=LARGE_BUFF)
         self.play(FadeIn(t5))
         self.wait()
 
@@ -702,7 +715,7 @@ class FACStack(Scene):
 
         # mmmfixme: add a small animation of a stack in action, push and pop, during this part.
         new_title = TextMobject('The Call Stack').to_edge(UP)
-        t1 = TextMobject('Function calls push a new frame\\\\onto the call stack')\
+        t1 = TextMobject('Function calls push a new frame\\\\onto the stack')\
             .to_edge(LEFT).shift(UP)
         t2 = TextMobject('Returning pops a frame off\\\\the stack').next_to(t1, DOWN, buff=LARGE_BUFF)
 
@@ -718,7 +731,7 @@ class FACStack(Scene):
         self.wait()
 
         self.play(FadeIn(t2))
-        self.wait()
+        self.wait(duration=2)
 
         t3 = TextMobject("Let's run again and see\\\\the call stack in action...").to_edge(LEFT)
         t3.shift(UP)
@@ -745,7 +758,7 @@ class FACStack(Scene):
             g.to_edge, RIGHT,
             FadeInFromDown(t4),
         )
-        self.wait()
+        self.wait(duration=2)
 
         t1 = TextMobject('Start in main()...')
         t1.next_to(title, DOWN, buff=LARGE_BUFF).to_edge(LEFT)
@@ -776,7 +789,7 @@ class FACStack(Scene):
             FadeOut(t1),
         )
         foo_code.complete_callee(hr_callee, self)
-        self.wait()
+        self.wait(duration=2)
 
         self.play(foo_code.highlight_lines, 2, foo_frame.set_line, 6, FadeOut(b1))
         self.wait()
@@ -812,7 +825,7 @@ class FACStack(Scene):
         b1 = BraceLabel(bar_frame, "Returning pops\\\\bar's frame",
                         brace_direction=LEFT, label_constructor=TextMobject)
         self.play(FadeIn(b1))
-        self.wait()
+        self.wait(duration=2)
 
         hr_returner, hr_returnee = bar_code.setup_for_return(foo_code)
         self.play(
@@ -1076,15 +1089,54 @@ class FACHarderOne(Scene):
         self.remove(hr_returnee)
         self.wait()
 
-        # mmmfixme: how to end this?
-        # - fade out the code and do some further reading links?
-        # - anatomy of a call stack still at the end?
-        #   - main at the bottom, foo and bar above
-        #   - clip out part of the first example, perhaps with the braces still there on return from bar?
-        
 
+class FACClosing(Scene):
+    def construct(self):
+        title = TextMobject('The Call Stack').to_edge(UP)
+        self.add(title)
 
+        frame_width = 3.0
+        args_ref = TextMobject('[ ]').scale(0.5)
+        main_frame = StackFrame('main()', 3, [('args', args_ref)], width=frame_width)
+        foo_frame = StackFrame('foo()', 6, [('n', 6)], width=frame_width)
+        bar_frame = StackFrame('bar(1, 2)', 13,
+                               [('x', 1), ('y', 2), ('a', 3), ('b', 6)], width=frame_width)
+        main_frame.to_edge(DOWN)
+        foo_frame.next_to(main_frame, UP)
+        bar_frame.next_to(foo_frame, UP)
+        self.play(
+            LaggedStartMap(FadeInFrom, VGroup(main_frame, foo_frame, bar_frame),
+                           direction=UP, lag_ratio=0.5)
+        )
+        self.wait()
 
+        text_scale = 0.75
+        b1 = BraceLabel(main_frame, 'Always starts\\\\with main()',
+                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        # b2 = BraceLabel(foo_frame, ['Calls push frames,\\\\', 'returns pop'],
+        #                 brace_direction=RIGHT, label_constructor=TextMobject,
+        #                 alignment='')
+        b3 = BraceLabel(bar_frame.slots()[0:2], 'Parameters',
+                        brace_direction=RIGHT, label_constructor=TextMobject, label_scale=text_scale)
+        b4 = BraceLabel(bar_frame.slots()[2:4], 'Locals',
+                        brace_direction=RIGHT, label_constructor=TextMobject, label_scale=text_scale)
+        b5 = BraceLabel(bar_frame.slots()[0:4], 'Storage for all\\\\variables in a function',
+                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
 
+        push_up = TextMobject('Calls push frames').scale(text_scale)
+        pua = Arrow(push_up.get_bottom(), push_up.get_top()).scale(2)
+        pua.next_to(push_up, LEFT)
+        pug = VGroup(push_up, pua)
+        # pug.next_to(foo_frame, LEFT)
+        pug.to_edge(LEFT).shift(DOWN)
+        pop_down = TextMobject('Returns pop frames').scale(text_scale)
+        pda = Arrow(pop_down.get_top(), pop_down.get_bottom()).scale(2)
+        pda.next_to(pop_down, RIGHT)
+        pdg = VGroup(pop_down, pda)
+        # pdg.next_to(foo_frame, RIGHT)
+        pdg.to_edge(RIGHT).shift(DOWN)
 
+        notes = VGroup(b1, pug, pdg, b5, b3, b4)
+        self.play(LaggedStartMap(ShowCreation, notes, lag_ratio=0.7), run_time=3)
+        self.wait(duration=5)
 
