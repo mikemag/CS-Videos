@@ -374,8 +374,7 @@ class StackFrame(VGroup):
         digest_config(self, kwargs, locals())
         super().__init__(**kwargs)
 
-        # mmmfixme: prefer this to be static elsewhere
-        em = TextMobject('M')
+        em = TextMobject('M').scale(self.text_scale)
         self.slot_height = em.get_height() + SMALL_BUFF * 2
         self.slot_width = em.get_width() * 5 + SMALL_BUFF * 2
 
@@ -393,7 +392,7 @@ class StackFrame(VGroup):
             s = self.build_stack_slot(vn, vv)
             slots.add(s)
             self.slot_map[vn] = i  # Can't remember slot objs because they may change over time
-        slots.arrange(DOWN, center=False, buff=0, aligned_edge=RIGHT)  # mmmfixme: check overlap
+        slots.arrange(DOWN, center=False, buff=0, aligned_edge=RIGHT)
         frame_name = TextMobject(name + ' line: ', str(line)) \
             .scale(self.text_scale).next_to(slots, UP, buff=SMALL_BUFF)
         self.add(slots, frame_name)
@@ -401,7 +400,9 @@ class StackFrame(VGroup):
         backbone = Line().set_opacity(0).set_width(self.width)
         self.add(backbone)
         br = BackgroundRectangle(self, buff=SMALL_BUFF, fill_opacity=0.15)
-        br.set_fill(color=[ORANGE, BLUE], opacity=[0.1, 0.2])
+        # This fill used ot have an opacity gradient, opacity=[0.1, 0.2], but it caused noticalbe
+        # banding in the final gradient. Shame, it was cool otherwise.
+        br.set_fill(color=[ORANGE, BLUE])
         self.add(br)
 
     def build_stack_slot(self, name, value):
@@ -456,22 +457,23 @@ class StackFrameDemo(Scene):
 
 class FACIntro(Scene):
     def construct(self):
-        t1 = TextMobject('Background: Call Stacks')
+        t1 = TextMobject('Call Stacks')
         t1.scale(1.5).to_edge(UP)
         self.play(ShowCreation(t1))
-        self.wait()
+        self.wait(duration=0.5)
 
         # Background information on call stacks, foundation for other concepts which build upon this.
         t2 = TextMobject("Learning the basics of the ``call stack'' helps with\\\\many "
                          'concepts in CS:', alignment='').shift(UP)
-        bl = BulletedList(' pass-by-value vs. pass-by-reference',
-                          ' passing object references',
+        bl = BulletedList('pass-by-value vs. pass-by-reference',
+                          'passing object references',
                           'recursion',
-                          ' debuggers',
+                          'debuggers',
                           buff=MED_SMALL_BUFF)
         bl.next_to(t2, DOWN)
         self.play(FadeInFromDown(t2))
         self.wait()
+
         for l in bl:
             self.play(FadeInFromDown(l))
             self.wait()
@@ -579,23 +581,25 @@ class FACStack(Scene):
         bar_code.complete_callee(hr_callee, self)
         self.wait()
 
-        # mmmfixme: arrow highlights to lead the eye from code to writing
         bar_x = TexMobject('1').move_to(bar_vars[0][1], aligned_edge=BOTTOM).shift(UP * 0.1)
         bar_y = TexMobject('2').move_to(bar_vars[1][1], aligned_edge=BOTTOM).shift(UP * 0.1)
-        self.play(Write(bar_x), Write(bar_y))
+        a = Arrow(bar_code.code_string().get_line(2), VGroup(bar_x, bar_y).get_right(), stroke_width=3)
+        self.play(Write(bar_x), Write(bar_y), ShowCreationThenDestruction(a))
         bar_vars_extras = VGroup()
         bar_vars_extras.add(bar_x, bar_y)
         self.play(bar_code.highlight_lines, 3)
         self.wait()
 
         bar_a = TexMobject('3').move_to(bar_vars[2][1], aligned_edge=BOTTOM).shift(UP * 0.1)
-        self.play(Write(bar_a))
+        a = Arrow(bar_code.code_string().get_line(3), bar_a.get_right(), stroke_width=3)
+        self.play(Write(bar_a), ShowCreationThenDestruction(a))
         bar_vars_extras.add(bar_a)
         self.play(bar_code.highlight_lines, 4)
         self.wait()
 
         bar_b = TexMobject('6').move_to(bar_vars[3][1], aligned_edge=BOTTOM).shift(UP * 0.1)
-        self.play(Write(bar_b))
+        a = Arrow(bar_code.code_string().get_line(4), bar_b.get_right(), stroke_width=3)
+        self.play(Write(bar_b), ShowCreationThenDestruction(a))
         bar_vars_extras.add(bar_b)
         self.play(bar_code.highlight_lines, 5)
         self.wait()
@@ -609,9 +613,11 @@ class FACStack(Scene):
         self.wait()
 
         foo_n = TexMobject('6').move_to(foo_vars[0][1], aligned_edge=BOTTOM).shift(UP * 0.1)
+        a = Arrow(foo_code.code_string().get_line(2), foo_n.get_right(), stroke_width=3)
         self.play(
             foo_code.highlight_lines, 3,
             ReplacementTransform(foo_n_q, foo_n),
+            ShowCreationThenDestruction(a),
         )
         foo_vars.add(foo_n)
         self.wait()
@@ -693,8 +699,7 @@ class FACStack(Scene):
         self.play(ReplacementTransform(bar_homes, bar_frame))
         self.wait()
 
-        # mmmfixme: italics?
-        t5 = TextMobject("They're happy and warm\\\\together!")\
+        t5 = TextMobject("\\textit{They're happy and warm\\\\together!}")\
             .scale(0.75).next_to(t4, DOWN, buff=LARGE_BUFF)
         self.play(FadeIn(t5))
         self.wait()
@@ -713,11 +718,17 @@ class FACStack(Scene):
         self.play(FadeIn(t7))
         self.wait()
 
-        # mmmfixme: add a small animation of a stack in action, push and pop, during this part.
         new_title = TextMobject('The Call Stack').to_edge(UP)
         t1 = TextMobject('Function calls push a new frame\\\\onto the stack')\
             .to_edge(LEFT).shift(UP)
         t2 = TextMobject('Returning pops a frame off\\\\the stack').next_to(t1, DOWN, buff=LARGE_BUFF)
+
+        box_count = 8
+        colors = color_gradient([BLUE, ORANGE], box_count)
+        little_boxes = VGroup(*[Rectangle(height=0.25, width=0.75, fill_opacity=1, color=colors[i])
+                                for i in range(box_count)])
+        little_boxes.arrange(UP, buff=0.1)
+        little_boxes.next_to(VGroup(foo_code, bar_code), LEFT, buff=LARGE_BUFF)
 
         self.play(
             ReplacementTransform(title, new_title),
@@ -726,12 +737,18 @@ class FACStack(Scene):
             FadeOut(foo_frame),
             FadeOut(bar_frame),
             FadeIn(t1),
+            LaggedStartMap(FadeInFrom, little_boxes, lambda m: (m, UP), lag_ratio=1.0, run_time=4.0),
         )
         title = new_title
         self.wait()
 
-        self.play(FadeIn(t2))
-        self.wait(duration=2)
+        self.play(
+            FadeIn(t2),
+            LaggedStartMap(FadeOutAndShift, VGroup(*reversed(little_boxes)),
+                                                   lambda m: (m, UP), lag_ratio=1.0,
+                                                   run_time=4.0),
+        )
+        self.wait(duration=1)
 
         t3 = TextMobject("Let's run again and see\\\\the call stack in action...").to_edge(LEFT)
         t3.shift(UP)
@@ -743,8 +760,6 @@ class FACStack(Scene):
         self.wait()
 
         print('Run with real call stack')
-
-        # mmmfixme: give a background to the entire stack, to illustrate it's a thing?
 
         # Let's also put main() into the picture. Start it off-frame upper right
         t4 = TextMobject("... and get main()\\\\into the picture.")\
@@ -1055,7 +1070,7 @@ class FACHarderOne(Scene):
         def fake_frame(name):
             frame_name = TextMobject(name).scale(0.75)
             br = BackgroundRectangle(frame_name, buff=SMALL_BUFF, fill_opacity=0.15)
-            br.set_fill(color=[ORANGE, BLUE], opacity=[0.1, 0.2])
+            br.set_fill(color=[ORANGE, BLUE])
             return VGroup(frame_name, br)
 
         println_funcs = [
@@ -1088,6 +1103,9 @@ class FACHarderOne(Scene):
         )
         self.remove(hr_returnee)
         self.wait()
+
+        self.play(FadeOut(main_code), FadeOut(foo_code), FadeOut(bar_code))
+        self.wait
 
 
 class FACClosing(Scene):
@@ -1140,3 +1158,22 @@ class FACClosing(Scene):
         self.play(LaggedStartMap(ShowCreation, notes, lag_ratio=0.7), run_time=3)
         self.wait(duration=5)
 
+
+class Misc(Scene):
+    def construct(self):
+        colors = color_gradient([BLUE, ORANGE], 8)
+        little_boxes = VGroup(*[Rectangle(height=0.25, width=0.75, fill_opacity=1, color=colors[i])
+                                for i in range(8)])
+        little_boxes.arrange(UP, buff=0.1)
+        little_boxes.center()
+
+        self.play(
+            LaggedStartMap(FadeInFrom, little_boxes, lambda m: (m, UP + LEFT*8),
+                           lag_ratio=1.0, run_time=4.0, path_arc=-np.pi/4),
+        )
+
+        self.play(
+            LaggedStartMap(FadeOutAndShift, VGroup(*reversed(little_boxes)),
+                           lambda m: (m, UP + RIGHT*8),
+                           lag_ratio=1.0, run_time=4.0, path_arc=-np.pi/8),
+        )
