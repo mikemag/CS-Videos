@@ -21,6 +21,7 @@ class Recursion1Intro(Scene):
 
 class FunctionCallsReview(Scene):
     def construct(self):
+        # mmmfixme: needs pacing
         title = TextMobject('Quick Review: Function Calls').to_edge(UP)
 
         code_scale = 0.75
@@ -174,6 +175,7 @@ class FunctionCallsReview(Scene):
 
 class RecursiveCalls(Scene):
     def construct(self):
+        # mmmfixme: needs pacing
         code_scale = 0.75
         ss_code = CodeBlock('Java', r"""
             public static double StrangeSqrt(double a) { 
@@ -193,43 +195,47 @@ class RecursiveCalls(Scene):
         )
         self.wait()
 
-        t2 = TextMobject('It has a recursive call, meaning it calls itself.')
+        t2 = TextMobject('It has a recursive call, meaning \\textit{it calls itself.}')
         t2.next_to(ss_code, DOWN, buff=LARGE_BUFF)
-        rl = ss_code.code_string().get_line(3)
         # 012345 6 7 8901234567890 1 2345
         # double b = StrangeSqrt(a * -1);
+        rl = ss_code.code_string().get_line(3)
         rc_highlight = SurroundingRectangle(rl[8:-1])
         self.play(
             FadeIn(t2),
             FadeIn(rc_highlight),
         )
         self.wait(duration=2)
+        self.play(
+            FadeOut(t2),
+            FadeOut(rc_highlight),
+        )
 
         # Run with a positive input
         main_code = CodeBlock('Java', r"""
-            ...
-            double n = StrangeSqrt(4);
-            ...
-            """).scale(code_scale)
+            public static void main(String[] args) {
+                double n = StrangeSqrt(4);
+            }
+            """).scale(code_scale - 0.1)
         frame_width = 3.5
-        main_frame = StackFrame('main()', 3, ['n'], width=frame_width)
+        main_frame = StackFrame('main()', 9, ['n'], width=frame_width)
         main_code.highlight_lines(2)
-        VGroup(main_code, main_frame).arrange(RIGHT).to_edge(DOWN)
+        VGroup(main_code, main_frame).arrange(RIGHT, buff=LARGE_BUFF).to_edge(DOWN)
         t3 = TextMobject("Let's see what it does with a positive input...")\
             .next_to(ss_code, DOWN, buff=LARGE_BUFF)
         self.play(
-            FadeOutAndShift(t1, UP),
-            FadeOut(t2),
-            MaintainPositionRelativeTo(t2, ss_code),
-            FadeOut(rc_highlight),
-            MaintainPositionRelativeTo(rc_highlight, ss_code),
+            FadeOut(t1),
+            MaintainPositionRelativeTo(t1, ss_code),
+            ss_code.to_edge, UP,
             FadeIn(t3),
             MaintainPositionRelativeTo(t3, ss_code),
-            ss_code.to_edge, UP,
+        )
+        self.wait()
+        self.play(
             FadeInFromDown(main_frame),
             FadeInFromDown(main_code),
         )
-        self.wait(duration=2)
+        self.wait()
 
         ss_frame = StackFrame('StrangeSqrt(4)', 1, ['a', 'b'], width=frame_width)
         ss_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
@@ -266,34 +272,29 @@ class RecursiveCalls(Scene):
 
         t1 = TextMobject('That seems pretty normal...').next_to(ss_code, DOWN, buff=LARGE_BUFF)
         self.play(
-            main_code.fade_out_highlight,
-            main_frame.set_line, 4,
+            main_code.highlight_lines, 3, main_frame.set_line, 10,
             FadeIn(t1),
         )
         self.wait()
 
+        t2 = TextMobject("Let's try it with a negative input...")\
+            .next_to(ss_code, DOWN, buff=LARGE_BUFF)
         self.play(
             FadeOutAndShiftDown(main_code),
             FadeOutAndShiftDown(main_frame),
             FadeOut(t1),
+            FadeIn(t2),
         )
-
-        # mmmfixme: left off annotating the animation here.
-        # - Run again with -4, pause and highlight when we're about to make the recursive call.
-        # - Make call, stop and point out new frame for same function at a different line #.
-        #   - Different place for variables too.
-        # - Run it to the last line, stop and point out where we'll return to.
-        # - Let it go from there I think... we'll see.
 
         # Run with a negative input and see the recursion
         main_code = CodeBlock('Java', r"""
-            ...
-            double n = StrangeSqrt(-4);
-            ...
-            """).scale(code_scale)
-        main_frame = StackFrame('main()', 3, ['n'], width=frame_width)
+            public static void main(String[] args) {
+                double n = StrangeSqrt(-4);
+            }
+            """).scale(code_scale - 0.1)
+        main_frame = StackFrame('main()', 9, ['n'], width=frame_width)
         main_code.highlight_lines(2)
-        VGroup(main_code, main_frame).arrange(RIGHT).to_edge(DOWN)
+        VGroup(main_code, main_frame).arrange(RIGHT, buff=LARGE_BUFF).to_edge(DOWN)
 
         self.play(
             FadeInFromDown(main_frame),
@@ -308,6 +309,7 @@ class RecursiveCalls(Scene):
             main_code.highlight_caller,
             ReplacementTransform(hr_caller, hr_callee, path_arc=-np.pi),
             FadeInFrom(ss_frame, UP),
+            FadeOut(t2),
         )
         ss_code.complete_callee(hr_callee, self)
         self.wait()
@@ -323,6 +325,10 @@ class RecursiveCalls(Scene):
         )
         self.wait()
 
+        self.play(
+            Indicate(rl[8:-1]),
+        )
+
         ss2_frame = StackFrame('StrangeSqrt(4)', 1, ['a', 'b'], width=frame_width)
         ss2_frame.next_to(ss_frame, UP, buff=SMALL_BUFF)
         r1_call_site_rect = ss_code.highlight_rect().copy().set_color(WHITE)
@@ -330,6 +336,16 @@ class RecursiveCalls(Scene):
             FadeInFrom(ss2_frame, UP),
             ss_code.highlight_lines, 1,
             FadeIn(r1_call_site_rect),
+        )
+        self.wait()
+
+        stack = VGroup(main_frame, ss_frame, ss2_frame)
+        t1 = TextMobject('Same function, but with\\\\a new frame on the stack')\
+            .next_to(stack, LEFT, buff=LARGE_BUFF).shift(UP * 0.5)
+        a = Arrow(t1.get_right(), ss2_frame.get_left(), stroke_width=3)
+        self.play(
+            FadeIn(t1),
+            GrowArrow(a),
         )
         self.wait()
 
@@ -342,6 +358,17 @@ class RecursiveCalls(Scene):
 
         self.play(
             ss_code.highlight_lines, 6, ss2_frame.set_line, 6,
+            FadeOut(t1),
+            FadeOut(a),
+        )
+        self.wait()
+
+        t1 = TextMobject('The stack tells us where to return,\\\\and with which values')\
+            .next_to(stack, LEFT, buff=LARGE_BUFF).shift(UP * 0.5)
+        a = Arrow(t1.get_right(), ss_frame.get_left(), stroke_width=3)
+        self.play(
+            FadeIn(t1),
+            GrowArrow(a),
         )
         self.wait()
 
@@ -356,6 +383,8 @@ class RecursiveCalls(Scene):
         self.play(
             ss_code.highlight_lines, 4, ss_frame.set_line, 4,
             ss_frame.update_slot, 'b', 2,
+            FadeOut(t1),
+            FadeOut(a),
         )
         self.wait()
 
@@ -369,24 +398,39 @@ class RecursiveCalls(Scene):
         main_code.complete_returnee(hr_returnee, self)
         self.wait()
         self.play(
-            main_code.fade_out_highlight,
-            main_frame.set_line, 4,
+            main_code.highlight_lines, 3, main_frame.set_line, 10,
         )
         self.wait()
 
+        t1 = TextMobject(
+            'Thinking about the call stack can help you keep track of\\\\'
+            'what a recursive function is doing at any given moment.'
+        ).next_to(ss_code, DOWN, buff=LARGE_BUFF)
         self.play(
             FadeOutAndShiftDown(main_code),
             FadeOutAndShiftDown(main_frame),
+            FadeIn(t1),
         )
         self.wait()
+        t2 = TextMobject('Try writing down part of the stack as you go.')\
+            .next_to(t2, DOWN, buff=LARGE_BUFF)
+        self.play(FadeInFromDown(t2))
+        self.wait()
 
-        # mmmfixme:
-        # - Now, let's change this a bit and break it!
+        self.play(
+            FadeOut(t1),
+            FadeOut(t2),
+        )
+        self.wait()
 
 
 class BrokenRecursiveCalls(Scene):
     def construct(self):
-        # - Now modify it if (a <= 0) and call it with foo(0).
+        # mmmfixme: start with the previous code segment in the same place.
+        # - Now, let's change this a bit and break it!
+        # - Now modify it (a <= 0) and call it with foo(0).
+        # - switch it out for the broken one, and highlight and note the change.
+
         # - Start stepping through this and see the stack start to grow forever.
         # - When will this program end? Never?
         # - Well, the stack is finite, so eventually you get a SO. Use the Java SO exception and show it hit and stop.

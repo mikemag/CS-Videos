@@ -105,7 +105,7 @@ class CodeTextString(SingleStringTexMobject):
         return self[line_no - 1]
 
     def __get_highlight_rect(self, left_x, right_x, lines_obj, color):
-        buff = SMALL_BUFF
+        buff = SMALL_BUFF  # mmmfixme: pass in as an arg, or make it based on the overall line height so it scales properly with smaller text
         # r = RoundedRectangle(width=right_x - left_x + 2 * buff,
         r = Rectangle(width=right_x - left_x + 2 * buff,
                       height=lines_obj.get_height() + 2 * buff,

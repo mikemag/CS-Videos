@@ -58,5 +58,12 @@ Useful tutorials, example projects, etc.
 
 ## License
 
-Everything here is licensed under the MIT license except as
-otherwise noted. See the LICENSE file in this directory for details.
+The content of the videos and presentations, and the code in this directory which generate the 
+visuals for these, are copyright by [Michael Magruder](https://github.com/mikemag) and 
+licensed under a 
+[Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
+
+The general purpose animation code found in the csanim subdirectory, on the other hand, 
+is licensed under the MIT license except as
+otherwise noted. See the LICENSE file in that directory for details.
+
