@@ -104,6 +104,9 @@ class CodeTextString(SingleStringTexMobject):
     def get_line(self, line_no):
         return self[line_no - 1]
 
+    def get_lines(self, start, end):
+        return self[start - 1:end]
+
     def __get_highlight_rect(self, left_x, right_x, lines_obj, color):
         buff = SMALL_BUFF  # mmmfixme: pass in as an arg, or make it based on the overall line height so it scales properly with smaller text
         # r = RoundedRectangle(width=right_x - left_x + 2 * buff,
@@ -136,10 +139,11 @@ class CodeBlock(VGroup):
         'height': 1,
     }
 
-    def __init__(self, language, raw_code_string, **kwargs):
+    def __init__(self, language, raw_code_string, line_offset=0, **kwargs):
         digest_config(self, kwargs, locals())
         super().__init__(**kwargs)
         self.callsite_highlight = None
+        self.line_offset = line_offset
         code_string = CodeTextString(language, raw_code_string)
         highlight_rect = code_string.get_line_highlight_rect(1).set_opacity(0)
         hrg = VGroup(highlight_rect)

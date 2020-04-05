@@ -238,12 +238,12 @@ class FACStack(Scene):
 
         frame_width = 2.8
         foo_vars = [('n', '6')]
-        foo_frame = StackFrame('foo()', 3, foo_vars, width=frame_width)
+        foo_frame = StackFrame(foo_code, 'foo()', 3, foo_vars, width=frame_width)
         foo_frame.move_to(foo_homes, aligned_edge=LEFT).shift(LEFT * .5)
         self.play(ReplacementTransform(foo_homes, foo_frame))
         self.wait()
 
-        bar_frame = StackFrame('bar(1,2)', 9, bar_var_vals, width=frame_width)
+        bar_frame = StackFrame(bar_code, 'bar(1,2)', 9, bar_var_vals, width=frame_width)
         bar_frame.move_to(bar_homes, aligned_edge=LEFT).shift(LEFT * .5)
         self.play(ReplacementTransform(bar_homes, bar_frame))
         self.wait()
@@ -328,7 +328,7 @@ class FACStack(Scene):
         t1.next_to(title, DOWN, buff=LARGE_BUFF).to_edge(LEFT)
         frame_width = 3.0
         args_ref = TextMobject('[ ]').scale(0.5)
-        main_frame = StackFrame('main()', 3, [('args', args_ref)], width=frame_width)
+        main_frame = StackFrame(main_code, 'main()', 3, [('args', args_ref)], width=frame_width)
         main_frame.next_to(g, LEFT, buff=LARGE_BUFF).to_edge(DOWN)
         main_code.move_highlight_rect(3)
         self.play(
@@ -340,7 +340,7 @@ class FACStack(Scene):
         )
         self.wait()
 
-        foo_frame = StackFrame('foo()', 5, ['n'], width=frame_width)
+        foo_frame = StackFrame(foo_code, 'foo()', 5, ['n'], width=frame_width)
         foo_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
         b1 = BraceLabel(foo_frame, 'Calling foo()\\\\pushes a frame',
                         brace_direction=LEFT, label_constructor=TextMobject)
@@ -358,7 +358,7 @@ class FACStack(Scene):
         self.play(foo_code.highlight_lines, 2, foo_frame.set_line, 6, FadeOut(b1))
         self.wait()
 
-        bar_frame = StackFrame('bar(1, 2)', 10, ['x', 'y', 'a', 'b'], width=frame_width)
+        bar_frame = StackFrame(bar_code, 'bar(1, 2)', 10, ['x', 'y', 'a', 'b'], width=frame_width)
         bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
         b1 = BraceLabel(bar_frame, 'Calling bar()\\\\pushes a frame',
                         brace_direction=LEFT, label_constructor=TextMobject)
@@ -491,7 +491,7 @@ class FACHarderOne(Scene):
 
         frame_width = 3.0
         args_ref = TextMobject('[ ]').scale(0.5)
-        main_frame = StackFrame('main()', 3, [('args', args_ref)], width=frame_width)
+        main_frame = StackFrame(main_code, 'main()', 3, [('args', args_ref)], width=frame_width)
         main_frame.next_to(cg, LEFT, buff=LARGE_BUFF * 2).to_edge(DOWN)
         main_code.move_highlight_rect(3)
         self.play(
@@ -500,7 +500,7 @@ class FACHarderOne(Scene):
         )
         self.wait()
 
-        foo_frame = StackFrame('foo(1)', 5, ['a', 'b', 'c'], width=frame_width)
+        foo_frame = StackFrame(foo_code, 'foo(1)', 5, ['a', 'b', 'c'], width=frame_width)
         foo_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
         hr_caller, hr_callee = main_code.setup_for_call(foo_code, 1)
         self.play(
@@ -517,7 +517,7 @@ class FACHarderOne(Scene):
         )
         self.wait()
 
-        bar_frame = StackFrame('bar(1, 2)', 10, ['x', 'y', 'a', 'b'], width=frame_width)
+        bar_frame = StackFrame(bar_code, 'bar(1, 2)', 10, ['x', 'y', 'a', 'b'], width=frame_width)
         bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
         hr_caller, hr_callee = foo_code.setup_for_call(bar_code, 1)
         self.play(
@@ -562,7 +562,7 @@ class FACHarderOne(Scene):
         )
         self.wait()
 
-        bar_frame = StackFrame('bar(1, 6)', 10, ['x', 'y', 'a', 'b'], width=frame_width)
+        bar_frame = StackFrame(bar_code, 'bar(1, 6)', 10, ['x', 'y', 'a', 'b'], width=frame_width)
         bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
         hr_caller, hr_callee = foo_code.setup_for_call(bar_code, 1)
         self.play(
@@ -663,10 +663,11 @@ class FACClosing(Scene):
         self.add(title)
 
         frame_width = 3.0
+        dummy_code = CodeBlock('Java', 'foo')
         args_ref = TextMobject('[ ]').scale(0.5)
-        main_frame = StackFrame('main()', 3, [('args', args_ref)], width=frame_width)
-        foo_frame = StackFrame('foo()', 6, [('n', 6)], width=frame_width)
-        bar_frame = StackFrame('bar(1, 2)', 13,
+        main_frame = StackFrame(dummy_code, 'main()', 3, [('args', args_ref)], width=frame_width)
+        foo_frame = StackFrame(dummy_code, 'foo()', 6, [('n', 6)], width=frame_width)
+        bar_frame = StackFrame(dummy_code, 'bar(1, 2)', 13,
                                [('x', 1), ('y', 2), ('a', 3), ('b', 6)], width=frame_width)
         main_frame.to_edge(DOWN)
         foo_frame.next_to(main_frame, UP)

@@ -13,9 +13,12 @@ class StackFrame(VGroup):
         'width': 2,
     }
 
-    def __init__(self, name, line, vars, **kwargs):
+    def __init__(self, code, func_label, line, args_and_vars, **kwargs):
         digest_config(self, kwargs, locals())
         super().__init__(**kwargs)
+
+        self.line = line
+        self.code = code
 
         em = TextMobject('M').scale(self.text_scale)
         self.slot_height = em.get_height() + SMALL_BUFF * 2
@@ -23,7 +26,7 @@ class StackFrame(VGroup):
 
         slots = VGroup()
         self.slot_map = {}
-        for i, v in enumerate(vars):
+        for i, v in enumerate(args_and_vars):
             if isinstance(v, str):
                 vn = v
                 vv = '-'
@@ -36,9 +39,9 @@ class StackFrame(VGroup):
             slots.add(s)
             self.slot_map[vn] = i  # Can't remember slot objs because they may change over time
         slots.arrange(DOWN, center=False, buff=0, aligned_edge=RIGHT)
-        frame_name = TextMobject(name + ' line: ', str(line)) \
+        func_label = TextMobject(func_label + ' line: ', str(line + self.code.line_offset)) \
             .scale(self.text_scale).next_to(slots, UP, buff=SMALL_BUFF)
-        self.add(slots, frame_name)
+        self.add(slots, func_label)
         self.center()
         backbone = Line().set_opacity(0).set_width(self.width)
         self.add(backbone)
@@ -66,9 +69,13 @@ class StackFrame(VGroup):
     def header_line(self):
         return self[1]
 
+    def background_rect(self):
+        return self[3]
+
     def set_line(self, line):
         t = self.header_line()[1]
-        t.become(TextMobject(str(line)).scale(self.text_scale).move_to(t))
+        t.become(TextMobject(str(line + self.code.line_offset)).scale(self.text_scale).move_to(t))
+        self.line = line
         return self
 
     def update_slot(self, var_name, val):
@@ -76,3 +83,71 @@ class StackFrame(VGroup):
         s = self.slots()[si]
         s[2].become(TextMobject(str(val)).scale(self.text_scale).move_to(s[2]))
         return self
+
+    def align_data(self, mobject):
+        # This ensures that after a transform our data fields get updated.
+        # So far, only line can change with a transform.
+        super().align_data(mobject)
+        if isinstance(mobject, StackFrame):
+            self.line = mobject.line
+
+    def get_update_line_anims(self, line):
+        return AnimationGroup(
+            ApplyMethod(self.set_line, line),
+            ApplyMethod(self.code.highlight_lines, line),
+        )
+
+
+class CallStack(VGroup):
+    def animate_call(self, new_frame, scene):
+        extra_anims = []
+        if len(self) > 2:
+            extra_anims.append(ApplyMethod(
+                self.shift,
+                DOWN * new_frame.get_height() + DOWN * SMALL_BUFF
+            ))
+        new_frame.next_to(self[-1], UP, buff=SMALL_BUFF)
+        prev_code = self[-1].code
+        if prev_code != new_frame.code:
+            hr_caller, hr_callee = prev_code.setup_for_call(new_frame.code, 1)
+            scene.play(
+                *extra_anims,
+                prev_code.highlight_caller,
+                ReplacementTransform(hr_caller, hr_callee, path_arc=-np.pi),
+                FadeInFrom(new_frame, UP),
+                MaintainPositionRelativeTo(new_frame, self[-1]),
+            )
+            new_frame.code.complete_callee(hr_callee, self)
+        else:
+            scene.play(
+                *extra_anims,
+                new_frame.code.highlight_lines, 1,
+                FadeInFrom(new_frame, UP),
+                MaintainPositionRelativeTo(new_frame, self[-1]),
+            )
+        self.add(new_frame)
+
+    def animate_return(self, scene):
+        current_frame = self[-1]
+        self.remove(current_frame)
+        anim_stack_shift = []
+        if len(self) > 2:
+            anim_stack_shift.append(ApplyMethod(
+                self.shift,
+                UP * current_frame.get_height() + UP * SMALL_BUFF
+            ))
+        caller_frame = self[-1]
+        if caller_frame.code != current_frame.code:
+            hr_returner, hr_returnee = current_frame.code.setup_for_return(caller_frame.code)
+            scene.play(
+                ReplacementTransform(hr_returner, hr_returnee, path_arc=np.pi),
+                caller_frame.code.highlight_returnee,
+                FadeOutAndShift(current_frame, UP),
+            )
+            caller_frame.code.complete_returnee(hr_returnee, self)
+        else:
+            scene.play(
+                *anim_stack_shift,
+                FadeOutAndShift(current_frame, UP),
+                caller_frame.code.highlight_lines, caller_frame.line,
+            )
