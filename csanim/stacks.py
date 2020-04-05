@@ -11,6 +11,7 @@ class StackFrame(VGroup):
     CONFIG = {
         'text_scale': 0.75,
         'width': 2,
+        'slot_char_width': 5,
     }
 
     def __init__(self, code, func_label, line, args_and_vars, **kwargs):
@@ -22,7 +23,7 @@ class StackFrame(VGroup):
 
         em = TextMobject('M').scale(self.text_scale)
         self.slot_height = em.get_height() + SMALL_BUFF * 2
-        self.slot_width = em.get_width() * 5 + SMALL_BUFF * 2
+        self.slot_width = em.get_width() * self.slot_char_width + SMALL_BUFF * 2
 
         slots = VGroup()
         self.slot_map = {}
