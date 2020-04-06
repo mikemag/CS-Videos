@@ -107,8 +107,8 @@ class StackFrame(VGroup):
 
 
 class CallStack(VGroup):
-    def animate_call(self, new_frame, scene):
-        extra_anims = []
+    def animate_call(self, new_frame, scene, extra_anims=None):
+        extra_anims = [] if extra_anims is None else extra_anims
         if len(self) > 2:
             extra_anims.append(ApplyMethod(
                 self.shift,
