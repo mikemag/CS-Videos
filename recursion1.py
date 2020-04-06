@@ -6,176 +6,59 @@ from cs_education.csanim.stacks import StackFrame, CallStack
 
 class Recursion1Intro(Scene):
     def construct(self):
-        title = TextMobject('Recursion').scale(1.5).to_edge(TOP)
-        subtitle = TextMobject('\\textit{An introduction}').next_to(title, DOWN)
+        title = TextMobject('Recursion: Part 1').scale(1.5).to_edge(UP)
         self.play(ShowCreation(title))
-        self.play(FadeInFromDown(subtitle))
+        self.wait(duration=0.5)
+
+        t1 = TextMobject('Recursion is a fundamental part of CS,\\\\but it can be confusing to learn.')
+        t1.next_to(title, DOWN, buff=LARGE_BUFF)
+        t2 = TextMobject("That's okay! It will get easier with practice.")
+        t2.next_to(t1, DOWN, buff=LARGE_BUFF)
+        self.play(FadeInFromDown(t1))
         self.wait()
+        self.play(FadeInFromDown(t2))
+        self.wait(duration=3)
 
-        # Why?
-        # Foundational part of CS
-        # Lots of useful, important algorithms are most easily written recursively
-        # Lots of data is recursive, and working on it with recursive algorithm is natural and easy
-        # And it's on the AP exam!! :)
+        def animate_note_with_list(anchor, t, l, extra_anims):
+            t.next_to(anchor, DOWN, buff=LARGE_BUFF)
+            l.next_to(t, DOWN, buff=LARGE_BUFF)
+            self.play(
+                *extra_anims,
+                FadeInFromDown(t),
+            )
+            self.wait()
+            for part in l:
+                self.play(FadeIn(part))
+                self.wait(0.5)
+            self.wait()
 
+        t3 = TextMobject('Many useful, important algorithms\\\\are easily written recursively')
+        l1 = TextMobject('Sorts', ', searches', ', mathematics', ', etc.')
+        animate_note_with_list(title, t3, l1, [FadeOut(t1), FadeOut(t2)])
 
-class FunctionCallsReview(Scene):
-    def construct(self):
-        # mmmfixme: needs pacing
-        title = TextMobject('Quick Review: Function Calls').to_edge(UP)
+        t4 = TextMobject('Lots of data is recursive,\\\\so using recursion on them is natural')
+        l2 = TextMobject('Lists', ', trees', ', file systems', ', HTML', ', etc.')
+        animate_note_with_list(title, t4, l2, [FadeOut(t3), FadeOut(l1)])
 
-        code_scale = 0.75
-        main_code = CodeBlock('Java', r"""
-            public static
-            void main(String[] args) {
-                int n = foo(2);
-            }
-            """).scale(code_scale)
-        foo_code = CodeBlock('Java', r"""
-            static int foo(int x) {
-                int n = bar(x + 1, x * 2);
-                return n;
-            }
-            """).scale(code_scale)
-        bar_code = CodeBlock('Java', r"""
-            static int bar(int x,
-                           int y) {
-                int a = x + y;
-                return a;
-            }
-            """).scale(code_scale)
-        fbg = VGroup(main_code, foo_code, bar_code)
-        fbg.arrange(DOWN, buff=MED_SMALL_BUFF, aligned_edge=LEFT)
-        fbg.to_edge(DR)
+        t5 = TextMobject("We'll take a look at two short\\\\recursive functions to get started")
+        t5.next_to(title, DOWN, buff=LARGE_BUFF)
+        t6 = TextMobject("Prereq: we'll look at call stacks as we run these functions.\\\\"
+                         "Check out the Call Stacks video if you need a quick review!").scale(0.75)
+        t6.to_edge(BOTTOM)
         self.play(
-            ShowCreation(title),
-            FadeInFrom(fbg, RIGHT),
+            FadeOut(t4),
+            FadeOut(l2),
+            FadeInFromDown(t5),
+            FadeInFromDown(t6),
         )
-        self.wait()
+        self.wait(duration=3)
 
-        frame_width = 3.0
-        args_ref = TextMobject('[ ]').scale(0.5)
-        main_frame = StackFrame(main_code, 'main()', 3, [('args', args_ref), 'n'], width=frame_width)
-        main_frame.next_to(fbg, LEFT, buff=LARGE_BUFF).to_edge(DOWN)
-        main_code.move_highlight_rect(3)
-        text_scale = 0.75
-        b1 = BraceLabel(main_frame, 'The call stack\\\\starts with main()',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
-        self.play(
-            FadeInFrom(main_frame, UP),
-            main_code.highlight_lines, 3,
-            FadeInFrom(b1, UP),
-        )
+        self.play(*[FadeOut(o) for o in self.mobjects])
         self.wait()
-
-        foo_frame = StackFrame(foo_code, 'foo(2)', 5, ['x', 'n'], width=frame_width)
-        foo_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
-        b2 = BraceLabel(foo_frame, 'Calls push frames',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
-        hr_caller, hr_callee = main_code.setup_for_call(foo_code, 1)
-        self.play(
-            main_code.highlight_caller,
-            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
-            FadeInFrom(foo_frame, UP),
-            FadeInFrom(b2, UP),
-        )
-        foo_code.complete_callee(hr_callee, self)
-        self.wait()
-
-        self.play(
-            foo_code.highlight_lines, 2, foo_frame.set_line, 6,
-            foo_frame.update_slot, 'x', 2,
-        )
-        self.wait()
-
-        bar_frame = StackFrame(bar_code, 'bar(3, 4)', 10, ['x', 'y', 'a'], width=frame_width)
-        bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
-        b3 = BraceLabel(bar_frame, 'Holds arguments\\\\and locals',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
-        hr_caller, hr_callee = foo_code.setup_for_call(bar_code, (1,2))
-        self.play(
-            foo_code.highlight_caller,
-            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
-            FadeInFrom(bar_frame, UP),
-            FadeInFrom(b3, UP),
-        )
-        bar_code.complete_callee(hr_callee, self)
-        self.wait()
-
-        self.play(
-            bar_code.highlight_lines, 3, bar_frame.set_line, 11,
-            bar_frame.update_slot, 'x', 3,
-            bar_frame.update_slot, 'y', 4,
-        )
-        self.wait()
-
-        self.play(
-            bar_code.highlight_lines, 4, bar_frame.set_line, 12,
-            bar_frame.update_slot, 'a', 7,
-        )
-        self.wait()
-
-        hr_returner, hr_returnee = bar_code.setup_for_return(foo_code)
-        self.play(
-            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
-            foo_code.highlight_returnee,
-            Uncreate(bar_frame),
-            FadeOutAndShift(b3, LEFT),
-            FadeOutAndShift(b2, LEFT),
-            FadeOutAndShift(b1, LEFT),
-        )
-        foo_code.complete_returnee(hr_returnee, self)
-        self.wait()
-
-        b4 = BraceLabel(foo_frame, 'Returns pop',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
-        self.play(
-            foo_code.highlight_lines, 3, foo_frame.set_line, 7,
-            foo_frame.update_slot, 'n', 7,
-            ShowCreation(b4),
-        )
-        self.wait()
-
-        hr_returner, hr_returnee = foo_code.setup_for_return(main_code)
-        self.play(
-            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
-            main_code.highlight_returnee,
-            Uncreate(foo_frame),
-            FadeOutAndShift(b4, LEFT),
-        )
-        main_code.complete_returnee(hr_returnee, self)
-        self.wait()
-
-        self.play(
-            main_code.highlight_lines, 4, main_frame.set_line, 4,
-            main_frame.update_slot, 'n', 7,
-        )
-        self.wait()
-
-        hr_returner, hr_returnee = main_code.setup_for_return(main_code)
-        hr_returnee.shift(UP * 4)
-        self.play(
-            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
-            Uncreate(main_frame),
-        )
-        self.remove(hr_returnee)
-        self.wait()
-
-        t1 = TextMobject('Take a moment to think about\\\\'
-                         'where args and locals live,\\\\'
-                         'and  what the call stack looks like.').to_edge(LEFT)
-        t2 = TextMobject('\\textit{It will help later!!}').next_to(t1, DOWN, buff=LARGE_BUFF)
-        self.play(FadeIn(t1))
-        self.wait()
-        self.play(ShowCreation(t2))
-        self.wait()
-
-        # mmmfixme: transition to next scene
 
 
 class RecursiveCalls(Scene):
     def construct(self):
-        # mmmfixme: needs pacing
         code_scale = 0.75
         ss_code = CodeBlock('Java', r"""
             public static double StrangeSqrt(double a) { 
@@ -193,7 +76,7 @@ class RecursiveCalls(Scene):
             FadeIn(t1),
             ShowCreation(ss_code),
         )
-        self.wait()
+        self.wait(duration=2.5)
 
         t2 = TextMobject('It has a recursive call, meaning \\textit{it calls itself.}')
         t2.next_to(ss_code, DOWN, buff=LARGE_BUFF)
@@ -205,7 +88,7 @@ class RecursiveCalls(Scene):
             FadeIn(t2),
             FadeIn(rc_highlight),
         )
-        self.wait(duration=2)
+        self.wait(duration=3)
         self.play(
             FadeOut(t2),
             FadeOut(rc_highlight),
@@ -275,7 +158,7 @@ class RecursiveCalls(Scene):
             main_frame.update_slot, 'n', 2,
             FadeIn(t1),
         )
-        self.wait()
+        self.wait(duration=2)
 
         t2 = TextMobject("Let's try it with a negative input...")\
             .next_to(ss_code, DOWN, buff=LARGE_BUFF)
@@ -347,7 +230,7 @@ class RecursiveCalls(Scene):
             FadeIn(t1),
             GrowArrow(a),
         )
-        self.wait()
+        self.wait(duration=2)
 
         # Now we have a positive input again
         self.play(
@@ -370,7 +253,7 @@ class RecursiveCalls(Scene):
             FadeIn(t1),
             GrowArrow(a),
         )
-        self.wait()
+        self.wait(duration=2)
 
         # Return back to line 3...
         self.play(
@@ -411,11 +294,11 @@ class RecursiveCalls(Scene):
             FadeOutAndShiftDown(main_frame),
             FadeIn(t1),
         )
-        self.wait()
+        self.wait(duration=3)
         t2 = TextMobject('Try writing down part of the stack as you go.')\
             .next_to(t2, DOWN, buff=LARGE_BUFF)
         self.play(FadeInFromDown(t2))
-        self.wait()
+        self.wait(duration=2)
 
         self.play(
             FadeOut(t1),
@@ -426,8 +309,6 @@ class RecursiveCalls(Scene):
 
 class BrokenRecursiveCalls(Scene):
     def construct(self):
-        # mmmfixme: needs pacing
-
         # - Now, let's change this a bit and break it!
         # - Now modify it (a <= 0) and call it with foo(0).
         # - switch it out for the broken one, and highlight and note the change.
@@ -444,9 +325,9 @@ class BrokenRecursiveCalls(Scene):
         ss_good_code.to_edge(UP)
         self.add(ss_good_code)
 
-        so_exception = TextMobject("Let's break this code in a very small way and\\\\see what happens...")
-        so_exception.next_to(ss_good_code, DOWN, buff=LARGE_BUFF)
-        self.play(FadeIn(so_exception))
+        t1 = TextMobject("Let's break this code in a very small way and\\\\see what happens...")
+        t1.next_to(ss_good_code, DOWN, buff=LARGE_BUFF)
+        self.play(FadeIn(t1))
         self.wait()
 
         gl2 = ss_good_code.code_string().get_line(2)
@@ -475,10 +356,10 @@ class BrokenRecursiveCalls(Scene):
         t2 = TextMobject("This small change will have a big effect on one case: 0\\\\"
                          "Let's run it and see.").next_to(ss_bad_code, DOWN, buff=LARGE_BUFF)
         self.play(
-            FadeOut(so_exception),
+            FadeOut(t1),
             FadeIn(t2),
         )
-        self.wait()
+        self.wait(duration=3)
 
         self.play(
             FadeOut(t2),
@@ -571,10 +452,10 @@ class BrokenRecursiveCalls(Scene):
             curr_ss_frame = call_ss_again(sg, curr_ss_frame)
 
         # - When will this program end? Never?
-        so_exception = TextMobject(
+        t1 = TextMobject(
             "Hrm... when is this going to end??"
         ).next_to(main_code, UP, buff=LARGE_BUFF)
-        extra_text = [FadeIn(so_exception)]
+        extra_text = [FadeIn(t1)]
         for i in range(4):
             curr_ss_frame = call_ss_again(sg, curr_ss_frame, extra_text)
             extra_text = None
@@ -582,7 +463,7 @@ class BrokenRecursiveCalls(Scene):
         t2 = TextMobject(
             "Never?"
         ).next_to(main_code, UP, buff=LARGE_BUFF)
-        extra_text = [FadeOut(so_exception), FadeIn(t2)]
+        extra_text = [FadeOut(t1), FadeIn(t2)]
         for i in range(4):
             curr_ss_frame = call_ss_again(sg, curr_ss_frame, extra_text)
             extra_text = None
@@ -622,7 +503,7 @@ class BrokenRecursiveCalls(Scene):
             Write(so_exception),
         )
         sg.add(so_frame)
-        self.wait()
+        self.wait(duration=2)
 
         ss_bad_code.generate_target()
         so_exception.generate_target()
@@ -639,7 +520,7 @@ class BrokenRecursiveCalls(Scene):
             FadeOutAndShiftDown(main_code),
             FadeInFromDown(t1),
         )
-        self.wait()
+        self.wait(duration=2)
 
         t2 = TextMobject(
             "This program made {\\raise.17ex\\hbox{$\\scriptstyle\\sim$}}15,000 calls before crashing.")
@@ -650,7 +531,7 @@ class BrokenRecursiveCalls(Scene):
             FadeIn(t2),
             FadeInFromDown(t4),
         )
-        self.wait(duration=2)
+        self.wait(duration=4)
 
         t5 = TextMobject('\\textit{Most common mistake with recursion.}')
         t6 = TextMobject("You'll see this a lot. Everyone does!")
@@ -659,7 +540,7 @@ class BrokenRecursiveCalls(Scene):
             *[FadeOut(t) for t in [t1, t2, t4]],
             *[FadeIn(t) for t in [t5, t6]],
         )
-        self.wait(duration=2)
+        self.wait(duration=3)
 
         # Transition
         t1 = TextMobject("Alright, let's look at a more interesting function...")
@@ -675,7 +556,6 @@ class BrokenRecursiveCalls(Scene):
 
 class Power1(Scene):
     def construct(self):
-        # mmmfixme: needs pacing. Anything else to say at the end?
         t1 = TextMobject("Let's compute $x^n$").shift(UP)
         self.play(FadeIn(t1))
         self.wait()
@@ -683,7 +563,7 @@ class Power1(Scene):
         t2 = TextMobject("i.e., $2^4=16$, or $4^3=64$, etc.")
         t2.next_to(t1, DOWN, buff=LARGE_BUFF)
         self.play(FadeInFromDown(t2))
-        self.wait()
+        self.wait(duration=2)
 
         t3 = TextMobject('Recall that')
         f1 = TexMobject('x^n=', 'x', '\\times', 'x \\times ... \\times x', 'x^{n-1}')
@@ -695,24 +575,24 @@ class Power1(Scene):
                         brace_direction=UP, label_constructor=TextMobject)
         g = VGroup(t3, f1[:-1], b1)  # For display
         self.play(
-            t1.to_edge, UP,
+            FadeOut(t1),
             FadeOut(t2),
             FadeInFromDown(g),
         )
-        self.wait()
+        self.wait(duration=3)
 
         b2 = BraceLabel(f1[3], '$n-1$ times',
                         brace_direction=UP, label_constructor=TextMobject)
         self.play(
             ReplacementTransform(b1, b2),
         )
-        self.wait()
+        self.wait(duration=2)
 
         self.play(
             ReplacementTransform(f1[3], f2[3]),
             FadeOut(b2),
         )
-        self.wait()
+        self.wait(duration=2)
 
         t4 = TextMobject("That's starting to feel a bit recursive!")
         t4.next_to(dg, DOWN, buff=MED_LARGE_BUFF)
@@ -730,7 +610,7 @@ class Power1(Scene):
             }
             """).scale(code_scale)
         self.play(
-            *[FadeOut(o) for o in [t1, t3, t4, f1[:-1], f2[3]]],
+            *[FadeOut(o) for o in [t3, t4, f1[:-1], f2[3]]],
             FadeInFromDown(power_code),
         )
         self.wait()
@@ -746,7 +626,6 @@ class Power1(Scene):
         t1 = TextMobject("Let's step through it to see how it goes...")
         t1.next_to(power_code, DOWN)
         self.play(
-            Uncreate(b1),
             FadeIn(t1),
         )
         self.wait();
@@ -763,6 +642,7 @@ class Power1(Scene):
         VGroup(main_code, main_frame).arrange(RIGHT, buff=LARGE_BUFF).to_edge(DOWN)
         self.play(
             FadeOut(t1),
+            FadeOut(b1),
             power_code.to_edge, UP,
             FadeInFromDown(main_frame),
             FadeInFromDown(main_code),
@@ -775,35 +655,33 @@ class Power1(Scene):
             call_stack.animate_call(stack_frame, self)
 
             self.play(
-                stack_frame.get_update_line_anims(2),
+                *stack_frame.get_update_line_anims(2),
                 stack_frame.update_slot, 'x', x,
                 stack_frame.update_slot, 'n', n,
             )
 
             if n == 0:
-                self.play(
-                    stack_frame.get_update_line_anims(3),
-                )
-
+                self.play(*stack_frame.get_update_line_anims(3))
+                self.wait()
                 call_stack.animate_return(self)
                 return 1
             else:
-                self.play(
-                    stack_frame.get_update_line_anims(5),
-                )
-
+                self.play(*stack_frame.get_update_line_anims(5))
+                self.wait()
                 t = call_power(x, n - 1, call_stack)
+
                 self.play(
-                    stack_frame.get_update_line_anims(6),
+                    *stack_frame.get_update_line_anims(6),
                     stack_frame.update_slot, 't', t,
                 )
-
+                self.wait()
+                call_stack[-1].code = power_code
                 call_stack.animate_return(self)
                 return x * t
 
         result = call_power(4, 3, CallStack(main_frame))
         self.play(
-            main_frame.get_update_line_anims(3),
+            *main_frame.get_update_line_anims(3),
             main_frame.update_slot, 'y', result,
         )
         self.wait()
@@ -816,7 +694,7 @@ class Power1(Scene):
             ReplacementTransform(lhs, final_eq[0]),
             ReplacementTransform(rhs, final_eq[1]),
         )
-        self.wait()
+        self.wait(duration=2)
 
         self.play(
             *[FadeOut(o) for o in [final_eq, main_frame, main_code]]
@@ -826,8 +704,6 @@ class Power1(Scene):
 
 class Anatomy(Scene):
     def construct(self):
-        # mmmfixme: pacing
-
         # Look at power1() and highlight parts of it. Anatomy of a recursive function.
         # Always has two parts: base case and recursive step.
         code_scale = 0.75
@@ -876,6 +752,7 @@ class Anatomy(Scene):
         )
         self.wait()
 
+        points_dwell_time = 2.5
         t2 = TextMobject(
             "- stops the recursion and returns\\\\",
             "- value is computed directly from the inputs, or constant\\\\",
@@ -895,7 +772,7 @@ class Anatomy(Scene):
                 FadeInFromDown(t),
                 FadeIn(h),
             )
-            self.wait()
+            self.wait(duration=points_dwell_time)
         self.play(FadeOut(base_highlights[-1]))
         self.wait()
 
@@ -948,7 +825,7 @@ class Anatomy(Scene):
                 FadeInFromDown(t),
                 FadeIn(h),
             )
-            self.wait()
+            self.wait(duration=points_dwell_time)
         self.play(FadeOut(recurse_highlights[-1]))
         self.wait()
 
@@ -957,246 +834,36 @@ class Anatomy(Scene):
             FadeOut(t2),
             power_code.restore,
         )
-        self.wait()
+        self.wait(0.5)
+
+        power_code.generate_target()
+        power_code.target.to_edge(RIGHT)
+        bcb = BraceLabel(power_code.target.code_string().get_lines(2, 4), '\\textit{Base Case}',
+                         brace_direction=LEFT, label_constructor=TextMobject, buff=LARGE_BUFF)
+        rsb = BraceLabel(power_code.target.code_string().get_lines(5, 6), '\\textit{Recursive Step}',
+                         brace_direction=LEFT, label_constructor=TextMobject, buff=LARGE_BUFF)
+        self.play(
+            MoveToTarget(power_code),
+        )
+        self.play(
+            ShowCreation(bcb),
+            ShowCreation(rsb),
+        )
+        self.wait(0.5)
 
         t1 = TextMobject('Base Case', ':', ' stops the recursion')
         t2 = TextMobject('Recursive Step', ':', ' reduce - call - recombine')
         t2.next_to(t1.get_part_by_tex(':'), DOWN, submobject_to_align=t2.get_part_by_tex(':'),
                    buff=MED_LARGE_BUFF)
-        g = VGroup(t1, t2).next_to(power_code, DOWN, buff=LARGE_BUFF)
+        g = VGroup(t1, t2).shift(DOWN * 1.5)
         self.play(FadeIn(g))
-        self.wait()
+        self.wait(duration=points_dwell_time)
 
-        # mmmfixme: transition
+        t3 = TextMobject("In Part 2 we'll look at making this function more efficient!").scale(0.75)
+        t3.to_edge(DOWN).set_color(BLUE)
+        self.play(Write(t3))
 
-
-class Power2(Scene):
-    def construct(self):
-        t1 = TextMobject("Let's look at our \\texttt{power(x, n)} function again")
-        t1.to_edge(UP)
-        code_scale = 0.75
-        power1_code = CodeBlock('Java', r"""
-            public static int power(int x, int n) {
-                if (n == 0) {
-                    return 1;
-                }
-                int t = power(x, n - 1);
-                return x * t;
-            }
-            """).scale(code_scale)
-        power1_code.next_to(t1, DOWN, buff=MED_LARGE_BUFF)
-        self.play(
-            FadeIn(t1),
-            FadeIn(power1_code),
-        )
-
-        t2 = TextMobject("How many times does it call itself?")
-        t2.next_to(power1_code, DOWN, buff=MED_LARGE_BUFF)
-        self.play(Write(t2))
-        self.wait(duration=2)
-
-        t3 = TextMobject("It call's itself $n$ times. Recall our original equation:")
-        t3.move_to(t2)
-        f1 = TexMobject('x^n=', 'x', '\\times', 'x \\times ... \\times x')
-        f1.next_to(t3, DOWN)
-        b1 = BraceLabel(f1[1:], '$n$ times',
-                        brace_direction=DOWN, label_constructor=TextMobject)
-        f1 = VGroup(f1, b1)
-        self.play(
-            ReplacementTransform(t2, t3),
-            FadeInFromDown(f1),
-        )
-        self.wait()
-
-        t4 = TextMobject('Can we do better?')
-        self.play(
-            *[FadeOut(o) for o in self.mobjects],
-            FadeIn(t4),
-        )
-        self.wait()
-
-        t4.generate_target()
-        t4.target.to_edge(UP)
-        t5 = TextMobject('Consider that $x^n=x^{n/2} \\times x^{n/2}$ if $n$ is even...')
-        t6 = TextMobject(
-            '...and $x^n=x \\times x^{\\lfloor n/2 \\rfloor} \\times '
-            'x^{\\lfloor n/2 \\rfloor}$ if $n$ is odd.')
-        t7 = TextMobject('Cutting things in half is a common recursive technique.')
-        t5.next_to(t4.target, DOWN, buff=LARGE_BUFF * 1.5)
-        t6.next_to(t5, DOWN, buff=MED_LARGE_BUFF)
-        t7.next_to(t6, DOWN, buff=LARGE_BUFF)
-        self.play(
-            MoveToTarget(t4),
-            FadeInFromDown(t5),
-        )
-        self.wait()
-        self.play(FadeInFromDown(t6))
-        self.wait()
-        self.play(FadeInFromDown(t7))
-        self.wait()
-
-        t8 = TextMobject("That's gotta call itself fewer than n times, let's try it!")
-        t8.next_to(t7, DOWN, buff=LARGE_BUFF)
-        self.play(FadeInFromDown(t8))
-        self.wait()
-
-        code_scale = 0.7
-        power2_code = CodeBlock('Java', r"""
-            public static int power2(int x, int n) {
-                if (n == 0) {
-                    return 1;
-                }
-                int t = power2(x, n / 2);
-                if (n % 2 == 0) {
-                    return t * t;
-                }
-                return x * t * t;
-            }	
-            """).scale(code_scale)
-        power2_code.to_edge(UP)
-
-        self.play(
-            *[FadeOut(o) for o in self.mobjects],
-            FadeInFromDown(power2_code),
-        )
-        self.wait()
-
-        # Start stepping through this and see it go.
-        main_code = CodeBlock('Java', r"""
-            public static void main(String[] args) {
-                int y = power2(2, 30);
-            }
-            """, line_offset=10).scale(code_scale - 0.1)
-        frame_width = 3.5
-        main_frame = StackFrame(main_code, 'main()', 2, ['y'], width=frame_width, slot_char_width=8)
-        main_code.highlight_lines(2)
-        VGroup(main_code, main_frame).arrange(RIGHT, buff=LARGE_BUFF).to_edge(DOWN)
-        self.play(
-            power2_code.to_edge, UP,
-            FadeInFromDown(main_frame),
-            FadeInFromDown(main_code),
-        )
-        self.wait()
-
-        def call_power2(x, n, call_stack):
-            stack_frame = StackFrame(
-                power2_code, 'power(%d, %d)' % (x, n), 1, ['x', 'n', 't'], width=frame_width)
-            call_stack.animate_call(stack_frame, self)
-
-            self.play(
-                stack_frame.get_update_line_anims(2),
-                stack_frame.update_slot, 'x', x,
-                stack_frame.update_slot, 'n', n,
-            )
-
-            if n == 0:
-                self.play(stack_frame.get_update_line_anims(3))
-                call_stack.animate_return(self)
-                return 1
-            else:
-                self.play(stack_frame.get_update_line_anims(5))
-
-                t = call_power2(x, int(n / 2), call_stack)
-                self.play(
-                    stack_frame.get_update_line_anims(6),
-                    stack_frame.update_slot, 't', t,
-                )
-
-                if n % 2 == 0:
-                    self.play(stack_frame.get_update_line_anims(7))
-                    call_stack.animate_return(self)
-                    return t * t
-
-                self.play(stack_frame.get_update_line_anims(9))
-                call_stack.animate_return(self)
-                return x * t * t
-
-        t1 = TextMobject('How many times will \\texttt{power2(2, 30)} call itself?')
-        t2 = TextMobject("We know it'll be less than 30! How about 15?")
-        t3 = TextMobject("How about a lot less? Let's see...")
-        mg = VGroup(main_code, main_frame)
-        t1.next_to(mg, UP, buff=MED_LARGE_BUFF)
-        t2.move_to(t1)
-        t3.move_to(t2)
-        self.play(ShowCreation(t1))
-        self.wait()
-        self.play(ReplacementTransform(t1, t2))
-        self.wait()
-        self.play(ReplacementTransform(t2, t3))
-        self.wait()
-        self.play(FadeOut(t3))
-
-        result = call_power2(2, 30, CallStack(main_frame))
-        self.play(
-            main_frame.get_update_line_anims(3),
-            main_frame.update_slot, 'y', result,
-        )
-        self.wait()
-
-        t1 = TextMobject('We got our answer in just 5 recursive calls!').set_color(YELLOW)
-        t1.next_to(mg, UP, buff=MED_LARGE_BUFF)
-        self.play(ShowCreation(t1))
-        self.wait()
-
-        #   - Show the number of recursive calls is log(n) instead of n.
-        #     - Graph 'em real quick… should be easy with manim.
-
-        # mmmfixme: I'm not sure I like how this is ending. Could be too much.
-        # - Consider leaving this to "further reading", or saying that an exploration of why
-        #   will come in a later video.
-        # - This feels like a wall of text after a long video.
-        return
-        
-        t2 = TextMobject("Wait, just 5 recursive calls for $2^{30}$??")
-        t2.to_edge(UP)
-        self.play(
-            *[FadeOut(o) for o in self.mobjects],
-            FadeInFromDown(t2),
-        )
-
-        t3 = TextMobject("We're cutting $n$ in half with each recursive call...")
-        t3.next_to(t2, DOWN, buff=LARGE_BUFF)
-        self.play(FadeInFromDown(t3))
-        t4 = TextMobject("and you can only cut 30 in half 5 times before you hit 0.")
-        t4.next_to(t3, DOWN)
-        self.play(FadeIn(t4))
-        self.wait()
-
-        f1 = TexMobject('30/2=15', '/2=7.5', '/2=3.75', '/2=1.875', '/2=0.9375')
-        f1.next_to(t4, DOWN, buff=MED_LARGE_BUFF)
-        for p in f1:
-            self.play(Write(p))
-            self.wait(duration=0.5)
-        self.wait()
-
-        t5 = TextMobject(
-            "You can compute this directly with the base 2 logarithm:\\\\"
-            "$\\log_2 30=%f$" % math.log2(30)
-        )
-        t5.next_to(f1, DOWN, buff=LARGE_BUFF)
-        self.play(FadeIn(t5))
-        self.wait()
-
-        t6 = TextMobject(
-            "That's the nice thing about dividing problems in half:\\\\"
-            "the work done is proportional to $\\log_2 n$"
-        )
-        t6.next_to(t5, DOWN, buff=LARGE_BUFF)
-        self.play(FadeInFromDown(t6))
-        self.wait()
+        # self.play(*[FadeOut(o) for o in self.mobjects])
+        self.wait(duration=5)
 
 
-# mmmfixme: this is getting long already, save Fib for a separate video.
-
-class Fibonacci(Scene):
-    def construct(self):
-        # Now do Fibonacci.
-        # Two calls instead of one.
-        # Refresher on what the equation is and why it's useful.
-        # Trace a short call, and track the history of the calls to the side.
-        #   - Then run thru a longer one, tracking the history and showing a bushy tree.
-        #   - Simplify the call stack as it runs and focus on the growing call history tree.
-        #   - Afterwords, explain how most recursive algorithms are shown like this in books and elsewhere, and
-        #     encourage them to study the picture and see how it relates to the code.
-        #   - Leave this as the final image of the video.
-        pass

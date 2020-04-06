@@ -727,3 +727,155 @@ class Misc(Scene):
                            lambda m: (m, UP + RIGHT*8),
                            lag_ratio=1.0, run_time=4.0, path_arc=-np.pi/8),
         )
+
+
+class CallStackReview(Scene):
+    def construct(self):
+        title = TextMobject('Quick Review: The Call Stack').to_edge(UP)
+
+        code_scale = 0.75
+        main_code = CodeBlock('Java', r"""
+            public static
+            void main(String[] args) {
+                int n = foo(2);
+            }
+            """).scale(code_scale)
+        foo_code = CodeBlock('Java', r"""
+            static int foo(int x) {
+                int n = bar(x + 1, x * 2);
+                return n;
+            }
+            """).scale(code_scale)
+        bar_code = CodeBlock('Java', r"""
+            static int bar(int x,
+                           int y) {
+                int a = x + y;
+                return a;
+            }
+            """).scale(code_scale)
+        fbg = VGroup(main_code, foo_code, bar_code)
+        fbg.arrange(DOWN, buff=MED_SMALL_BUFF, aligned_edge=LEFT)
+        fbg.to_edge(DR)
+        self.play(
+            ShowCreation(title),
+            FadeInFrom(fbg, RIGHT),
+        )
+        self.wait()
+
+        frame_width = 3.0
+        args_ref = TextMobject('[ ]').scale(0.5)
+        main_frame = StackFrame(main_code, 'main()', 3, [('args', args_ref), 'n'], width=frame_width)
+        main_frame.next_to(fbg, LEFT, buff=LARGE_BUFF).to_edge(DOWN)
+        main_code.move_highlight_rect(3)
+        text_scale = 0.75
+        b1 = BraceLabel(main_frame, 'The call stack\\\\starts with main()',
+                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        self.play(
+            FadeInFrom(main_frame, UP),
+            main_code.highlight_lines, 3,
+            FadeInFrom(b1, UP),
+        )
+        self.wait()
+
+        foo_frame = StackFrame(foo_code, 'foo(2)', 5, ['x', 'n'], width=frame_width)
+        foo_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
+        b2 = BraceLabel(foo_frame, 'Calls push frames',
+                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        hr_caller, hr_callee = main_code.setup_for_call(foo_code, 1)
+        self.play(
+            main_code.highlight_caller,
+            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
+            FadeInFrom(foo_frame, UP),
+            FadeInFrom(b2, UP),
+        )
+        foo_code.complete_callee(hr_callee, self)
+        self.wait()
+
+        self.play(
+            foo_code.highlight_lines, 2, foo_frame.set_line, 6,
+            foo_frame.update_slot, 'x', 2,
+        )
+        self.wait()
+
+        bar_frame = StackFrame(bar_code, 'bar(3, 4)', 10, ['x', 'y', 'a'], width=frame_width)
+        bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
+        b3 = BraceLabel(bar_frame, 'Holds arguments\\\\and locals',
+                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        hr_caller, hr_callee = foo_code.setup_for_call(bar_code, (1,2))
+        self.play(
+            foo_code.highlight_caller,
+            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
+            FadeInFrom(bar_frame, UP),
+            FadeInFrom(b3, UP),
+        )
+        bar_code.complete_callee(hr_callee, self)
+        self.wait()
+
+        self.play(
+            bar_code.highlight_lines, 3, bar_frame.set_line, 11,
+            bar_frame.update_slot, 'x', 3,
+            bar_frame.update_slot, 'y', 4,
+        )
+        self.wait()
+
+        self.play(
+            bar_code.highlight_lines, 4, bar_frame.set_line, 12,
+            bar_frame.update_slot, 'a', 7,
+        )
+        self.wait(duration=3)
+
+        hr_returner, hr_returnee = bar_code.setup_for_return(foo_code)
+        self.play(
+            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
+            foo_code.highlight_returnee,
+            Uncreate(bar_frame),
+            FadeOutAndShift(b3, LEFT),
+            FadeOutAndShift(b2, LEFT),
+            FadeOutAndShift(b1, LEFT),
+        )
+        foo_code.complete_returnee(hr_returnee, self)
+        self.wait()
+
+        b4 = BraceLabel(foo_frame, 'Returns pop',
+                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        self.play(
+            foo_code.highlight_lines, 3, foo_frame.set_line, 7,
+            foo_frame.update_slot, 'n', 7,
+            ShowCreation(b4),
+        )
+        self.wait()
+
+        hr_returner, hr_returnee = foo_code.setup_for_return(main_code)
+        self.play(
+            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
+            main_code.highlight_returnee,
+            Uncreate(foo_frame),
+            FadeOutAndShift(b4, LEFT),
+        )
+        main_code.complete_returnee(hr_returnee, self)
+        self.wait()
+
+        self.play(
+            main_code.highlight_lines, 4, main_frame.set_line, 4,
+            main_frame.update_slot, 'n', 7,
+        )
+        self.wait()
+
+        hr_returner, hr_returnee = main_code.setup_for_return(main_code)
+        hr_returnee.shift(UP * 4)
+        self.play(
+            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
+            Uncreate(main_frame),
+        )
+        self.remove(hr_returnee)
+        self.wait()
+
+        t1 = TextMobject('Take a moment to think about\\\\'
+                         'where args and locals live,\\\\'
+                         'and  what the call stack looks like.').to_edge(LEFT)
+        t2 = TextMobject('\\textit{It will help later!!}').next_to(t1, DOWN, buff=LARGE_BUFF)
+        self.play(FadeIn(t1))
+        self.wait()
+        self.play(ShowCreation(t2))
+        self.wait(duration=2)
+

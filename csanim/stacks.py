@@ -93,10 +93,17 @@ class StackFrame(VGroup):
             self.line = mobject.line
 
     def get_update_line_anims(self, line):
-        return AnimationGroup(
-            ApplyMethod(self.set_line, line),
-            ApplyMethod(self.code.highlight_lines, line),
-        )
+        # TODO: This is a mess. We need to return the set_line method as the last entry so we can
+        # have auto-merge with update_slot calls in the play() that call this. That's not so bad,
+        # but not great. Worse, though, is that the AnimationGroup should be unnecessary!
+        # There is something I've missed wrt the frame holding the code, and when copies are
+        # made during animation. Possibly my copy/align_data impls are wrong. Need to dig in more.
+        return [
+            AnimationGroup(
+                ApplyMethod(self.code.highlight_lines, line),
+            ),
+            self.set_line, line,
+        ]
 
 
 class CallStack(VGroup):
