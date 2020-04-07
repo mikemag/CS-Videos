@@ -27,6 +27,7 @@ class Intro(Scene):
 class RevisitPower1(Scene):
     def construct(self):
         # mmmfixme: save space for a link to the Part 1 video.
+        # mmmfixme: pacing
 
         t1 = TextMobject("Let's look at our \\texttt{power(x,n)} function from Part 1 again")
         t1.to_edge(UP)
@@ -54,9 +55,9 @@ class RevisitPower1(Scene):
 
         t3 = TextMobject("It call's itself $n$ times. Recall our original equation:")
         t3.move_to(t2)
-        f1 = TexMobject('x^n=', 'x', '\\times', 'x \\times ... \\times x')
+        f1 = TexMobject('x^n=', 'x \\times x \\times ... \\times x', '= x \\times x^{n-1}')
         f1.next_to(t3, DOWN)
-        b1 = BraceLabel(f1[1:], '$n$ times',
+        b1 = BraceLabel(f1[1], '$n$ times',
                         brace_direction=DOWN, label_constructor=TextMobject)
         f1 = VGroup(f1, b1)
         hr = SurroundingRectangle(power1_code.code_string().get_line(5)[-5:-2])
@@ -265,7 +266,7 @@ class Equations(Scene):
                          'and the coding very simple!', tex_to_color_map={'int': RED})
         t1.next_to(eqtg, DOWN, buff=MED_LARGE_BUFF)
         self.play(*[MoveToTarget(o) for o in originals], FadeIn(t1))
-        self.wait()
+        self.wait(duration=2)
         eqg = VGroup(*originals)
 
         # Transform to code
@@ -339,6 +340,7 @@ class Equations(Scene):
 
 class RunPower2(Scene):
     def construct(self):
+        #mmmfixme: pacing
         code_scale = 0.7
         power2_code = CodeBlock('Java', r"""
             public static int power2(int x, int n) {
@@ -411,13 +413,14 @@ class RunPower2(Scene):
 
             if n == 0:
                 self.play(*stack_frame.get_update_line_anims(3))
+                self.wait(duration=call_ret_delay)
                 call_stack.animate_return(self)
                 return 1
             else:
                 self.play(*stack_frame.get_update_line_anims(5))
                 self.wait(duration=call_ret_delay)
 
-                t = call_power2(x, int(n / 2), call_stack, new_cc_num)
+                t = call_power2(x, n // 2, call_stack, new_cc_num)
                 self.play(
                     *stack_frame.get_update_line_anims(6),
                     stack_frame.update_slot, 't', t,
@@ -463,55 +466,169 @@ class RunPower2(Scene):
 
 class Log2(Scene):
     def construct(self):
-        #   - Show the number of recursive calls is log(n) instead of n.
-        #     - Graph 'em real quick… should be easy with manim.
+        #mmmfixme: pacing
         t1 = TextMobject('We got our answer in just 5 recursive calls!').set_color(YELLOW)
         t1.to_edge(TOP)
-        t2 = TextMobject('But why?').next_to(t1.target, DOWN, buff=LARGE_BUFF)
+        t2 = TextMobject('But why?').next_to(t1, DOWN, buff=LARGE_BUFF)
         self.add(t1, t2)
-
         self.wait()
 
+        t3 = TextMobject("We're cutting $n$ in half with \\underline{each} recursive call...")
+        t3.to_edge(TOP)
+        self.play(FadeOut(t1), ReplacementTransform(t2, t3))
+        self.wait(duration=2)
 
-# mmmfixme: some leftover code from previous iterations, likely all broken.
-class Leftovers(Scene):
-    def construct(self):
-        t2 = TextMobject("Wait, just 5 recursive calls for $2^{30}$??")
-        t2.to_edge(UP)
-        self.play(
-            *[FadeOut(o) for o in self.mobjects],
-            FadeInFromDown(t2),
-        )
-
-        t3 = TextMobject("We're cutting $n$ in half with each recursive call...")
-        t3.next_to(t2, DOWN, buff=LARGE_BUFF)
-        self.play(FadeInFromDown(t3))
         t4 = TextMobject("and you can only cut 30 in half 5 times before you hit 0.")
         t4.next_to(t3, DOWN)
         self.play(FadeIn(t4))
         self.wait()
 
-        f1 = TexMobject('30/2=15', '/2=7.5', '/2=3.75', '/2=1.875', '/2=0.9375')
-        f1.next_to(t4, DOWN, buff=MED_LARGE_BUFF)
-        for p in f1:
-            self.play(Write(p))
-            self.wait(duration=0.5)
+        def get_div_by_2_nums(n):
+            ns = [n]
+            while n > 0:
+                n //= 2
+                ns.append(n)
+            return ns
+
+        def get_number_line(nums):
+            us = (FRAME_WIDTH - LARGE_BUFF * 2) / (math.fabs(nums[0] - nums[-1]))
+            nts = nums.copy()
+            if us < 0.2:
+                nts.remove(1)
+
+            nl = NumberLine(
+                x_min=nums[-1], x_max=nums[0], include_numbers=True, unit_size=us,
+                tick_size=0.01, longer_tick_multiple=0.15 / 0.01,
+                numbers_to_show=nts, numbers_with_elongated_ticks=nums,
+            )
+            nl.center()
+            return nl
+
+        def animate_div_by_2(nums, nl):
+            wait_time = 0.5
+            dct = TextMobject('divisions: ', '0')
+            dct.next_to(nl, DOWN, buff=MED_LARGE_BUFF)
+            dc = TextMobject('0')
+            dc.move_to(dct[-1])
+            self.play(FadeInFromDown(dct[:-1]), FadeInFromDown(dc))
+            self.wait(duration=wait_time)
+
+            d = Dot(color=YELLOW)
+            d.next_to(nl.n2p(nums[0]), UP)
+            self.play(FadeInFrom(d, UP))
+            self.wait(duration=wait_time)
+
+            divs = 1
+            for n in nums[1:]:
+                d.generate_target()
+                d.target.next_to(nl.n2p(n), UP)
+                dc.generate_target()
+                dc.target = TextMobject(str(divs)).move_to(dct[-1])
+                divs += 1
+                self.play(MoveToTarget(d, path_arc=np.pi / (n / 2 + 1)), MoveToTarget(dc))
+                self.wait(duration=wait_time)
+
+            self.play(FadeOut(dct[:-1]), FadeOut(dc), FadeOut(d))
+
+        footnote = TextMobject('\\textit{* Remember, this is integer division!}')
+        footnote.scale(0.6).to_edge(DOWN)
+        nums_30 = get_div_by_2_nums(30)
+        nl1 = get_number_line(nums_30)
+        nl1.next_to(t4, DOWN, buff=LARGE_BUFF)
+        self.play(FadeIn(nl1), FadeInFromDown(footnote))
+        animate_div_by_2(nums_30, nl1)
+        self.play(FadeOut(nl1), FadeOutAndShiftDown(footnote))
         self.wait()
 
-        t5 = TextMobject(
-            "You can compute this directly with the base 2 logarithm:\\\\"
-            "$\\log_2 30=%f$" % math.log2(30)
-        )
-        t5.next_to(f1, DOWN, buff=LARGE_BUFF)
-        self.play(FadeIn(t5))
-        self.wait()
+        t5 = TextMobject("What if we try $3^{100}$?").shift(UP)
+        self.play(ReplacementTransform(t3, t5), FadeOut(t4))
 
-        t6 = TextMobject(
-            "That's the nice thing about dividing problems in half:\\\\"
-            "the work done is proportional to $\\log_2 n$"
+        nums_100 = get_div_by_2_nums(100)
+        nl2 = get_number_line(nums_100)
+        nl2.next_to(t5, DOWN, buff=LARGE_BUFF)
+        self.play(FadeIn(nl2))
+        animate_div_by_2(nums_100, nl2)
+        self.play(FadeOut(nl2))
+
+        t1 = TextMobject('You can compute this directly with $\\log_2{n}$').to_edge(TOP)
+        self.play(ReplacementTransform(t5, t1))
+
+        t2 = TexMobject('\\log_2{30}', '=', '%.4f' % math.log2(30))
+        t2a = TextMobject('5 times')
+        t3 = TexMobject('\\log_2{100}', '=', '%.4f' % math.log2(100))
+        t3a = TextMobject('7 times')
+        t4 = TexMobject('\\log_2{1000}', '=', '%.4f' % math.log2(1000))
+        t4a = TextMobject('10 times')
+        t3.next_to(t2, DOWN, aligned_edge=LEFT)
+        t4.next_to(t3, DOWN, aligned_edge=LEFT)
+        t4a.next_to(t4, RIGHT, buff=LARGE_BUFF).next_to(t4[-1], RIGHT, coor_mask=Y_AXIS)
+        t3a.next_to(t3[-1], RIGHT).next_to(t4a, UP, aligned_edge=RIGHT, coor_mask=X_AXIS)
+        t2a.next_to(t2[-1], RIGHT).next_to(t3a, UP, aligned_edge=RIGHT, coor_mask=X_AXIS)
+        g = VGroup(t2, t2a, t3, t3a, t4, t4a).center().next_to(t1, DOWN, buff=LARGE_BUFF)
+        self.play(ShowCreation(t2), ShowCreation(t3))
+        self.wait()
+        self.play(FadeIn(t2a), FadeIn(t3a))
+        self.wait(duration=3)
+
+        self.play(*[FadeOut(o) for o in self.mobjects])
+
+
+class Log2Graph(GraphScene):
+    CONFIG = {
+        "x_axis_label": "$n$",
+        "y_axis_label": "$time$",
+        "x_axis_width": FRAME_HEIGHT,
+        "y_axis_height": FRAME_HEIGHT / 2,
+        "y_max": 50,
+        "y_min": 0,
+        "x_max": 100,
+        "x_min": 0,
+        "x_labeled_nums": [50, 100],
+        "y_labeled_nums": range(0, 51, 10),
+        "y_tick_frequency": 10,
+        "x_tick_frequency": 10,
+        "axes_color": BLUE,
+        "graph_origin": np.array((-FRAME_X_RADIUS + LARGE_BUFF,
+                                  -FRAME_Y_RADIUS + LARGE_BUFF,
+                                  0))
+    }
+
+    def construct(self):
+        t1 = TextMobject(
+            "Dividing a problem in half over and over means\\\\"
+            "the work done is proportional to $\\log_2{n}$"
+        ).to_edge(UP)
+
+        t2 = TextMobject('\\textit{This is one of our\\\\favorite things to do in CS!}')
+        t2.to_edge(RIGHT)
+
+        t3 = TextMobject('The new \\texttt{power(x,n)} is \\underline{much}\\\\better than the old!')
+        t3.scale(0.8)
+        p1f = TexMobject('x^n=x \\times x^{n-1}').set_color(ORANGE)
+        t4 = TextMobject('\\textit{vs.}').scale(0.8)
+        p2f = TexMobject('x^n=x^{\\frac{n}{2}} \\times x^{\\frac{n}{2}}').set_color(GREEN)
+        p1v2g = VGroup(t3, p1f, t4, p2f).arrange(DOWN).center().to_edge(RIGHT)
+
+        self.setup_axes()
+        o_n = self.get_graph(lambda x: x, color=ORANGE, x_min=1, x_max=50)
+        o_log2n = self.get_graph(lambda x: math.log2(x), color=GREEN, x_min=2, x_max=90)
+        onl = TexMobject('O(n)')
+        olog2nl = TexMobject('O(\\log_2{n})')
+        onl.next_to(o_n.get_point_from_function(0.6), UL)
+        olog2nl.next_to(o_log2n.get_point_from_function(0.8), UP)
+        self.play(
+            FadeIn(t1),
+            FadeIn(self.axes),
+            # FadeInFromDown(t2),
+            FadeIn(p1v2g),
         )
-        t6.next_to(t5, DOWN, buff=LARGE_BUFF)
-        self.play(FadeInFromDown(t6))
+        self.play(
+            ShowCreation(o_n),
+            ShowCreation(o_log2n),
+            ShowCreation(onl),
+            ShowCreation(olog2nl),
+            run_time=3
+        )
         self.wait()
 
 
