@@ -4,13 +4,6 @@ from cs_education.csanim.code import CodeBlock, CodeTextString
 from cs_education.csanim.stacks import StackFrame, CallStack
 
 
-# Follow-on to Recursion 1
-# Making x^n faster
-# Explain /2 and log2
-# Graphicial representation Helen suggested
-# Need to show the transition between power1 and power2, show how power2 impls the new eq.
-# End with the power of 2 and log2 growth, links to more reading on big-oh.
-
 class Intro(Scene):
     def construct(self):
         title = TextMobject('Recursion: Part 2').scale(1.5).to_edge(UP)
@@ -26,9 +19,6 @@ class Intro(Scene):
 
 class RevisitPower1(Scene):
     def construct(self):
-        # mmmfixme: save space for a link to the Part 1 video.
-        # mmmfixme: pacing
-
         t1 = TextMobject("Let's look at our \\texttt{power(x,n)} function from Part 1 again")
         t1.to_edge(UP)
         code_scale = 0.75
@@ -66,7 +56,7 @@ class RevisitPower1(Scene):
             FadeInFromDown(f1),
             FadeIn(hr),
         )
-        self.wait(duration=3)
+        self.wait(duration=4)
 
         t4 = TextMobject('Can we do better?')
         self.play(
@@ -80,8 +70,6 @@ class RevisitPower1(Scene):
 
 class Equations(Scene):
     def construct(self):
-        #mmmfixme: pacing
-
         t1 = TextMobject("Let's go back to our original equation").shift(UP)
         self.play(FadeInFromDown(t1))
         self.wait()
@@ -159,7 +147,7 @@ class Equations(Scene):
 
         if_odd = TextMobject('\\textit{if $n$ is odd:}').next_to(of1, LEFT).set_color(YELLOW)
         self.play(ShowCreation(of1), ShowCreation(ob1n))
-        self.wait()
+        self.wait(duration=2)
 
         self.play(ReplacementTransform(ob1n, ob1nm1), FadeIn(if_odd), FadeOut(ot1))
         self.wait(duration=2)
@@ -209,7 +197,7 @@ class Equations(Scene):
         div_code = CodeTextString('Java', '(n-1)/2 == n/2').next_to(t1, DOWN)
 
         self.play(FadeInFromDown(t1), FadeInFromDown(div_code))
-        self.wait(duration=2)
+        self.wait(duration=3)
 
         t2 = TextMobject(
             'Integer division \\textit{truncates}: '
@@ -218,7 +206,7 @@ class Equations(Scene):
             '\\texttt{2.5}')
         t2.next_to(div_code, DOWN, buff=LARGE_BUFF)
         self.play(FadeInFromDown(t2))
-        self.wait(duration=2)
+        self.wait(duration=3)
 
         # Indicate movement before each exp transformation from code
         of4 = TexMobject('x^n=',
@@ -266,7 +254,7 @@ class Equations(Scene):
                          'and the coding very simple!', tex_to_color_map={'int': RED})
         t1.next_to(eqtg, DOWN, buff=MED_LARGE_BUFF)
         self.play(*[MoveToTarget(o) for o in originals], FadeIn(t1))
-        self.wait(duration=2)
+        self.wait(duration=3)
         eqg = VGroup(*originals)
 
         # Transform to code
@@ -340,7 +328,6 @@ class Equations(Scene):
 
 class RunPower2(Scene):
     def construct(self):
-        #mmmfixme: pacing
         code_scale = 0.7
         power2_code = CodeBlock('Java', r"""
             public static int power2(int x, int n) {
@@ -357,10 +344,10 @@ class RunPower2(Scene):
         power2_code.to_edge(UP)
         self.add(power2_code)
 
-        t1 = TextMobject("This version should call itself fewer than $n$ times!")
+        t1 = TextMobject("This version should call itself fewer than $n$ times")
         t1.next_to(power2_code, DOWN, buff=LARGE_BUFF)
         self.play(FadeInFromDown(t1))
-        self.wait(duration=2)
+        self.wait(duration=2.5)
 
         t2 = TextMobject('How many times do you think \\texttt{power2(2,30)} will call itself?',
                          tex_to_color_map={'30': YELLOW})
@@ -466,7 +453,6 @@ class RunPower2(Scene):
 
 class Log2(Scene):
     def construct(self):
-        #mmmfixme: pacing
         t1 = TextMobject('We got our answer in just 5 recursive calls!').set_color(YELLOW)
         t1.to_edge(TOP)
         t2 = TextMobject('But why?').next_to(t1, DOWN, buff=LARGE_BUFF)
@@ -504,8 +490,7 @@ class Log2(Scene):
             nl.center()
             return nl
 
-        def animate_div_by_2(nums, nl):
-            wait_time = 0.5
+        def animate_div_by_2(nums, nl, wait_time=0.5):
             dct = TextMobject('divisions: ', '0')
             dct.next_to(nl, DOWN, buff=MED_LARGE_BUFF)
             dc = TextMobject('0')
@@ -526,7 +511,7 @@ class Log2(Scene):
                 dc.target = TextMobject(str(divs)).move_to(dct[-1])
                 divs += 1
                 self.play(MoveToTarget(d, path_arc=np.pi / (n / 2 + 1)), MoveToTarget(dc))
-                self.wait(duration=wait_time)
+                self.wait(duration=wait_time / (1 if n > 6 else 2))
 
             self.play(FadeOut(dct[:-1]), FadeOut(dc), FadeOut(d))
 
@@ -547,7 +532,7 @@ class Log2(Scene):
         nl2 = get_number_line(nums_100)
         nl2.next_to(t5, DOWN, buff=LARGE_BUFF)
         self.play(FadeIn(nl2))
-        animate_div_by_2(nums_100, nl2)
+        animate_div_by_2(nums_100, nl2, wait_time=0.3)
         self.play(FadeOut(nl2))
 
         t1 = TextMobject('You can compute this directly with $\\log_2{n}$').to_edge(TOP)
@@ -629,7 +614,7 @@ class Log2Graph(GraphScene):
             ShowCreation(olog2nl),
             run_time=3
         )
-        self.wait()
+        self.wait(duration=5)
 
 
 class EqsOld(Scene):
