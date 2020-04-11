@@ -5,6 +5,7 @@ from cs_education.csanim.arrays import Array, ArrayIndex
 
 # Base class for all merge sort scenes, with support for a basic merge viz, and multi-level merge viz.
 class MergeSortScenes(Scene):
+
     def __init__(self, **kwargs):
         self.merge_element_count = 0
         self.merge_current_level = 0
@@ -26,11 +27,7 @@ class MergeSortScenes(Scene):
     def merge_level_extra_end(self, index, extra):
         pass
 
-    def merge_level(self,
-                    current_level,
-                    height,
-                    buff=SMALL_BUFF,
-                    speedy=False):
+    def merge_level(self, current_level, height, buff=SMALL_BUFF, speedy=False):
         new_level = VGroup()
         self.merge_current_level += 1
         for i in range(0, len(current_level), 2):
@@ -161,6 +158,7 @@ class MergeSortScenes(Scene):
 #
 # TODO: need to credit music to https://www.bensound.com/royalty-free-music/track/summer-chill-relaxed-tropical
 class MergeIntro(MergeSortScenes):
+
     def construct(self):
 
         # Merge Sort -- Part 1: Merging
@@ -222,6 +220,7 @@ class MergeIntro(MergeSortScenes):
 #   - And doing it with two already sorted arrays to make one larger one hopefully shows how
 #     this effects a sort.
 class MergeFirstExample(MergeSortScenes):
+
     def construct(self):
         skip_to = 0
 
@@ -366,10 +365,9 @@ class MergeFirstExample(MergeSortScenes):
                           run_time=self.merge_runtime)
                 merged.elements.submobjects[merged_m.get_value()] = lc
                 self.wait(duration=self.merge_runtime)
-                self.play(
-                    *left_l.animate_set_index(left_l.get_value() + 1),
-                    *merged_m.animate_set_index(merged_m.get_value() + 1),
-                    run_time=self.merge_runtime)
+                self.play(*left_l.animate_set_index(left_l.get_value() + 1),
+                          *merged_m.animate_set_index(merged_m.get_value() + 1),
+                          run_time=self.merge_runtime)
                 self.wait(duration=self.merge_runtime)
             else:
                 self.play(CircleIndicate(rc), run_time=self.merge_runtime)
@@ -380,10 +378,9 @@ class MergeFirstExample(MergeSortScenes):
                           run_time=self.merge_runtime)
                 merged.elements.submobjects[merged_m.get_value()] = rc
                 self.wait(duration=self.merge_runtime)
-                self.play(
-                    *right_r.animate_set_index(right_r.get_value() + 1),
-                    *merged_m.animate_set_index(merged_m.get_value() + 1),
-                    run_time=self.merge_runtime)
+                self.play(*right_r.animate_set_index(right_r.get_value() + 1),
+                          *merged_m.animate_set_index(merged_m.get_value() + 1),
+                          run_time=self.merge_runtime)
                 self.wait(duration=self.merge_runtime)
             if skip_to >= 2:
                 break
@@ -400,8 +397,8 @@ class MergeFirstExample(MergeSortScenes):
 
         cleanup_text = TextMobject('Left is done,\\\\so finish right...')
         cleanup_text.next_to(merged, BOTTOM, SMALL_BUFF)
-        code_image_cleanup = ImageMobject(
-            'merge_sort/merge_code_cleanup_loops', height=2.2)
+        code_image_cleanup = ImageMobject('merge_sort/merge_code_cleanup_loops',
+                                          height=2.2)
         code_image_cleanup.to_edge(BOTTOM, buff=0.01)
         self.play(
             FadeInFromDown(cleanup_text),
@@ -431,8 +428,7 @@ class MergeFirstExample(MergeSortScenes):
         # This is the core of the merge algorithm shown in the book, but rewritten.
         t2 = TextMobject('Merged two arrays of 4 into one array of 8')
         t2.to_edge(UP)
-        code_image_full = ImageMobject('merge_sort/merge_code_full',
-                                       height=4.0)
+        code_image_full = ImageMobject('merge_sort/merge_code_full', height=4.0)
         code_image_full.scale(1.2)
         code_image_full.to_edge(RIGHT)
         merged.generate_target(use_deepcopy=True)
@@ -468,6 +464,7 @@ class MergeFirstExample(MergeSortScenes):
 
 # Stepping back to look at the base case
 class MergeBaseCase(MergeSortScenes):
+
     def construct(self):
         # Okay, so we know how to merge two sorted arrays, but where do we get those from?
         # Well, the simplest case is an array of a single number.
@@ -546,6 +543,7 @@ class MergeBaseCase(MergeSortScenes):
 # - Same for the second pair.
 # - Now, take the pair of previous results, and merge them to produce the final result.
 class Merge4(MergeSortScenes):
+
     def construct(self):
         self.merge_runtime = 0.5
 
@@ -648,6 +646,7 @@ class Merge4(MergeSortScenes):
 # - On the next level, the last array of three is left over, so we bring it to the next level again.
 # - Etc, until the entire set is merged.
 class Merge11(MergeSortScenes):
+
     def __init__(self, **kwargs):
         self.runtime_stack = []
         self.level_element_count = 0
@@ -696,8 +695,7 @@ class Merge11(MergeSortScenes):
         while len(current_level) > 1:
             if len(all_levels) == squish_start_height:
                 g = VGroup(*all_levels[:-1])
-                self.play(g.scale, 0.8, g.to_edge, BOTTOM,
-                          {'buff': SMALL_BUFF})
+                self.play(g.scale, 0.8, g.to_edge, BOTTOM, {'buff': SMALL_BUFF})
                 self.play(all_levels[-1].next_to, all_levels[-2], UP,
                           {'buff': MED_SMALL_BUFF})
             if len(all_levels) > squish_start_height:
@@ -838,6 +836,7 @@ class Merge11(MergeSortScenes):
 
 
 class MergeNSpeedyClean(MergeSortScenes):
+
     def __init__(self, **kwargs):
         MergeSortScenes.__init__(self, **kwargs)
 

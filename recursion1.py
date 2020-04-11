@@ -5,6 +5,7 @@ from cs_education.csanim.stacks import StackFrame, CallStack
 
 
 class Recursion1Intro(Scene):
+
     def construct(self):
         title = TextMobject('Recursion: Part 1').scale(1.5).to_edge(UP)
         self.play(ShowCreation(title))
@@ -69,6 +70,7 @@ class Recursion1Intro(Scene):
 
 
 class RecursiveCalls(Scene):
+
     def construct(self):
         code_scale = 0.75
         ss_code = CodeBlock(
@@ -82,8 +84,7 @@ class RecursiveCalls(Scene):
             }
             """).scale(code_scale)
 
-        t1 = TextMobject(
-            'Consider this somewhat strange square root function:')
+        t1 = TextMobject('Consider this somewhat strange square root function:')
         t1.next_to(ss_code, UP, buff=LARGE_BUFF)
         self.play(
             FadeIn(t1),
@@ -183,8 +184,9 @@ class RecursiveCalls(Scene):
         main_code.complete_returnee(hr_returnee, self)
         self.wait()
 
-        t1 = TextMobject('That seems pretty normal...').next_to(
-            ss_code, DOWN, buff=LARGE_BUFF)
+        t1 = TextMobject('That seems pretty normal...').next_to(ss_code,
+                                                                DOWN,
+                                                                buff=LARGE_BUFF)
         self.play(
             main_code.highlight_lines,
             3,
@@ -261,7 +263,7 @@ class RecursiveCalls(Scene):
         )
         self.wait()
 
-        self.play(Indicate(rl[8:-1]), )
+        self.play(Indicate(rl[8:-1]),)
 
         ss2_frame = StackFrame(ss_code,
                                'StrangeSqrt(4)',
@@ -384,6 +386,7 @@ class RecursiveCalls(Scene):
 
 
 class BrokenRecursiveCalls(Scene):
+
     def construct(self):
         # - Now, let's change this a bit and break it!
         # - Now modify it (a <= 0) and call it with foo(0).
@@ -435,9 +438,7 @@ class BrokenRecursiveCalls(Scene):
 
         t2 = TextMobject(
             "This small change will have a big effect on one case: 0\\\\"
-            "Let's run it and see.").next_to(ss_bad_code,
-                                             DOWN,
-                                             buff=LARGE_BUFF)
+            "Let's run it and see.").next_to(ss_bad_code, DOWN, buff=LARGE_BUFF)
         self.play(
             FadeOut(t1),
             FadeIn(t2),
@@ -513,8 +514,7 @@ class BrokenRecursiveCalls(Scene):
                 extra_anims.append(
                     ApplyMethod(
                         stack_group.shift,
-                        DOWN * previous_frame.get_height() +
-                        DOWN * SMALL_BUFF))
+                        DOWN * previous_frame.get_height() + DOWN * SMALL_BUFF))
             if extras:
                 extra_anims.extend(extras)
 
@@ -677,6 +677,7 @@ class BrokenRecursiveCalls(Scene):
 
 
 class Power1(Scene):
+
     def construct(self):
         t1 = TextMobject("Let's compute $x^n$").shift(UP)
         self.play(FadeIn(t1))
@@ -711,7 +712,7 @@ class Power1(Scene):
                         '$n-1$ times',
                         brace_direction=UP,
                         label_constructor=TextMobject)
-        self.play(ReplacementTransform(b1, b2), )
+        self.play(ReplacementTransform(b1, b2),)
         self.wait(duration=2)
 
         self.play(
@@ -754,7 +755,7 @@ class Power1(Scene):
 
         t1 = TextMobject("Let's step through it to see how it goes...")
         t1.next_to(power_code, DOWN)
-        self.play(FadeIn(t1), )
+        self.play(FadeIn(t1),)
         self.wait()
 
         # Start stepping through this and see it go.
@@ -846,6 +847,7 @@ class Power1(Scene):
 
 
 class Anatomy(Scene):
+
     def construct(self):
         # Look at power1() and highlight parts of it. Anatomy of a recursive function.
         # Always has two parts: base case and recursive step.
@@ -991,7 +993,7 @@ class Anatomy(Scene):
                          brace_direction=LEFT,
                          label_constructor=TextMobject,
                          buff=LARGE_BUFF)
-        self.play(MoveToTarget(power_code), )
+        self.play(MoveToTarget(power_code),)
         self.play(
             ShowCreation(bcb),
             ShowCreation(rsb),

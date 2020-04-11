@@ -6,6 +6,7 @@ from cs_education.csanim.stacks import StackFrame
 
 # A single frame of all of the default colors, for reference.
 class Colors(Scene):
+
     def construct(self):
         g = VGroup(*[
             TextMobject(n.replace('_', ' ')).set_color(v).scale(0.8)
@@ -17,6 +18,7 @@ class Colors(Scene):
 
 
 class CodeTextStringDemo(Scene):
+
     def construct(self):
         snippets = [
             ('Java', r"""
@@ -89,6 +91,7 @@ class CodeTextStringDemo(Scene):
 
 
 class CodeBlockDemo(Scene):
+
     def construct(self):
         c1 = CodeBlock(
             'Java', r"""
@@ -171,6 +174,7 @@ class CodeBlockDemo(Scene):
 
 
 class StackFrameDemo(Scene):
+
     def construct(self):
         frame_width = 3
         f1 = StackFrame('foo()', 1, ['a', 'b', ('c', 2)], width=frame_width)

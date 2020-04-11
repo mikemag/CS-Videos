@@ -5,6 +5,7 @@ from cs_education.csanim.stacks import StackFrame, CallStack
 
 
 class Recursion3Intro(Scene):
+
     def construct(self):
         title = TextMobject('Recursion: Part 3').scale(1.5).to_edge(UP)
         self.play(ShowCreation(title))
@@ -12,6 +13,7 @@ class Recursion3Intro(Scene):
 
 
 class Fibonacci(Scene):
+
     def construct(self):
         # Now do Fibonacci.
         # Two calls instead of one.

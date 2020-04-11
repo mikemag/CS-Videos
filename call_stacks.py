@@ -5,6 +5,7 @@ from cs_education.csanim.stacks import StackFrame
 
 
 class FACIntro(Scene):
+
     def construct(self):
         t1 = TextMobject('Call Stacks')
         t1.scale(1.5).to_edge(UP)
@@ -35,6 +36,7 @@ class FACIntro(Scene):
 
 
 class FACStack(Scene):
+
     def construct(self):
         high_quality = False
 
@@ -503,8 +505,8 @@ class FACStack(Scene):
         )
         self.wait()
 
-        t1 = TextMobject(
-            'And when main() returns\\\\the program ends').to_edge(LEFT)
+        t1 = TextMobject('And when main() returns\\\\the program ends').to_edge(
+            LEFT)
         self.play(FadeIn(t1))
         self.wait()
 
@@ -527,6 +529,7 @@ class FACStack(Scene):
 
 
 class FACHarderOne(Scene):
+
     def construct(self):
         title = TextMobject('The Call Stack').to_edge(UP)
         t1 = TextMobject("Alright, let's do a more complicated one!")
@@ -805,6 +808,7 @@ class FACHarderOne(Scene):
 
 
 class FACClosing(Scene):
+
     def construct(self):
         title = TextMobject('The Call Stack').to_edge(UP)
         self.add(title)
@@ -879,6 +883,7 @@ class FACClosing(Scene):
 
 
 class Misc(Scene):
+
     def construct(self):
         colors = color_gradient([BLUE, ORANGE], 8)
         little_boxes = VGroup(*[
@@ -894,7 +899,7 @@ class Misc(Scene):
                            lambda m: (m, UP + LEFT * 8),
                            lag_ratio=1.0,
                            run_time=4.0,
-                           path_arc=-np.pi / 4), )
+                           path_arc=-np.pi / 4),)
 
         self.play(
             LaggedStartMap(FadeOutAndShift,
@@ -902,10 +907,11 @@ class Misc(Scene):
                            lambda m: (m, UP + RIGHT * 8),
                            lag_ratio=1.0,
                            run_time=4.0,
-                           path_arc=-np.pi / 8), )
+                           path_arc=-np.pi / 8),)
 
 
 class CallStackReview(Scene):
+
     def construct(self):
         title = TextMobject('Quick Review: The Call Stack').to_edge(UP)
 
