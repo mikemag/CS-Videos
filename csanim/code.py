@@ -21,7 +21,8 @@ class CodeTextString(SingleStringTexMobject):
         # - Also, can get the extra style code from LatexFormatter().get_style_defs()
         'template_tex_file_body': TEMPLATE_TEXT_FILE_BODY,
         'arg_separator': '',
-        'line_tolerance': 0.2,  # Delta in y to determine line breaks from the SVG
+        'line_tolerance':
+        0.2,  # Delta in y to determine line breaks from the SVG
     }
 
     def __init__(self, language, raw_code_string, **kwargs):
@@ -54,7 +55,8 @@ class CodeTextString(SingleStringTexMobject):
         # The submobjects have no association with the original input, but they do have x,y coords.
         # So we can break lines by changes in Y. The lines are presented in-order in the SVG, too.
         new_submobjects = []
-        current_line_y = self.submobjects[0].get_center()[1] - self.line_tolerance * 2
+        current_line_y = self.submobjects[0].get_center(
+        )[1] - self.line_tolerance * 2
         line_group = None
 
         for o in self.submobjects:
@@ -69,10 +71,11 @@ class CodeTextString(SingleStringTexMobject):
         new_submobjects.append(line_group)  # Pickup the last group
 
         if len(new_submobjects) != len(self.tex_strings):
-            warnings.warn('%s: split SVG into %d lines, but there are %d lines in the original '
-                          'LaTeX from Pygments! See %s' % (self.name, len(new_submobjects),
-                                                           len(self.tex_strings), self.file_path))
-
+            warnings.warn(
+                '%s: split SVG into %d lines, but there are %d lines in the original '
+                'LaTeX from Pygments! See %s' %
+                (self.name, len(new_submobjects), len(
+                    self.tex_strings), self.file_path))
         self.submobjects = new_submobjects
         return self
 
@@ -82,8 +85,7 @@ class CodeTextString(SingleStringTexMobject):
     def init_colors(self):
         self.set_fill(
             # color=self.fill_color or self.color,
-            opacity=self.fill_opacity,
-        )
+            opacity=self.fill_opacity, )
         self.set_stroke(
             # color=self.stroke_color or self.color,
             width=self.stroke_width,
@@ -110,10 +112,15 @@ class CodeTextString(SingleStringTexMobject):
     def __get_highlight_rect(self, left_x, right_x, lines_obj, color):
         buff = SMALL_BUFF  # mmmfixme: pass in as an arg, or make it based on the overall line height so it scales properly with smaller text
         # r = RoundedRectangle(width=right_x - left_x + 2 * buff,
-        r = Rectangle(width=right_x - left_x + 2 * buff,
-                      height=lines_obj.get_height() + 2 * buff,
-                      stroke_width=0, stroke_opacity=0, fill_color=color,
-                      fill_opacity=0.2, corner_radius=0.1)
+        r = Rectangle(
+            width=right_x - left_x + 2 * buff,
+            height=lines_obj.get_height() + 2 * buff,
+            stroke_width=0,
+            stroke_opacity=0,
+            fill_color=color,
+            fill_opacity=0.2,
+            corner_radius=0.1,
+        )
         r.move_to(lines_obj, aligned_edge=RIGHT).shift(RIGHT * buff)
         return r
 
@@ -169,8 +176,7 @@ class CodeBlock(VGroup):
     # Move it without changing it
     def move_highlight_rect(self, line):
         self.highlight_rect().move_to(
-            self.code_string().get_line_highlight_rect(line)
-        )
+            self.code_string().get_line_highlight_rect(line))
 
     # Returns a from and to highlight rect, each of which are independent of the code block
     def setup_for_call(self, callee, lines):
@@ -204,4 +210,3 @@ class CodeBlock(VGroup):
         scene.remove(hr)
         self.__highlight_rect_group().remove(self.highlight_rect())
         self.__highlight_rect_group().add(hr)
-

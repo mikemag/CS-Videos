@@ -3,11 +3,14 @@ from manimlib.imports import *
 from cs_education.csanim.code import CodeTextString, CodeBlock
 from cs_education.csanim.stacks import StackFrame
 
+
 # A single frame of all of the default colors, for reference.
 class Colors(Scene):
     def construct(self):
-        g = VGroup(*[TextMobject(n.replace('_', ' ')).set_color(v).scale(0.8)
-                     for n, v in COLOR_MAP.items()])
+        g = VGroup(*[
+            TextMobject(n.replace('_', ' ')).set_color(v).scale(0.8)
+            for n, v in COLOR_MAP.items()
+        ])
         g.arrange_in_grid(9, 7)
         self.add(g)
         self.wait()
@@ -87,13 +90,15 @@ class CodeTextStringDemo(Scene):
 
 class CodeBlockDemo(Scene):
     def construct(self):
-        c1 = CodeBlock('Java', r"""
+        c1 = CodeBlock(
+            'Java', r"""
             int foo() {
                 int n = bar(1, 2);
                 return n;
             }
             """)
-        c2 = CodeBlock('Java', r"""
+        c2 = CodeBlock(
+            'Java', r"""
             int bar(int x, int y) {
                 int a = x + y;
                 int b = a * 2;
@@ -173,8 +178,7 @@ class StackFrameDemo(Scene):
         self.play(f1.set_line, 2)
         self.play(f1.set_line, 3)
         self.play(f1.update_slot, 'b', 42)
-        self.play(f1.set_line, 4,
-                  f1.update_slot, 'a', 43)
+        self.play(f1.set_line, 4, f1.update_slot, 'a', 43)
 
         f2 = StackFrame('bar(1, 2, 3)', 1, ['x'], width=frame_width)
         f2.next_to(f1, DOWN, buff=SMALL_BUFF)
@@ -183,5 +187,3 @@ class StackFrameDemo(Scene):
 
         self.play(FadeOut(f1), FadeOut(f2))
         self.wait()
-
-

@@ -38,7 +38,8 @@ class StackFrame(VGroup):
                 vv = '-'
             s = self.build_stack_slot(vn, vv)
             slots.add(s)
-            self.slot_map[vn] = i  # Can't remember slot objs because they may change over time
+            self.slot_map[
+                vn] = i  # Can't remember slot objs because they may change over time
         slots.arrange(DOWN, center=False, buff=0, aligned_edge=RIGHT)
         func_label = TextMobject(func_label + ' line: ', str(line + self.code.line_offset)) \
             .scale(self.text_scale).next_to(slots, UP, buff=SMALL_BUFF)
@@ -54,7 +55,9 @@ class StackFrame(VGroup):
 
     def build_stack_slot(self, name, value):
         var_name = TextMobject(name).scale(self.text_scale)
-        slot_box = Rectangle(height=self.slot_height, width=self.slot_width, stroke_width=1)
+        slot_box = Rectangle(height=self.slot_height,
+                             width=self.slot_width,
+                             stroke_width=1)
         if isinstance(value, Mobject):
             var_value = value
         else:
@@ -75,7 +78,9 @@ class StackFrame(VGroup):
 
     def set_line(self, line):
         t = self.header_line()[1]
-        t.become(TextMobject(str(line + self.code.line_offset)).scale(self.text_scale).move_to(t))
+        t.become(
+            TextMobject(str(line + self.code.line_offset)).scale(
+                self.text_scale).move_to(t))
         self.line = line
         return self
 
@@ -99,10 +104,9 @@ class StackFrame(VGroup):
         # There is something I've missed wrt the frame holding the code, and when copies are
         # made during animation. Possibly my copy/align_data impls are wrong. Need to dig in more.
         return [
-            AnimationGroup(
-                ApplyMethod(self.code.highlight_lines, line),
-            ),
-            self.set_line, line,
+            AnimationGroup(ApplyMethod(self.code.highlight_lines, line), ),
+            self.set_line,
+            line,
         ]
 
 
@@ -110,10 +114,9 @@ class CallStack(VGroup):
     def animate_call(self, new_frame, scene, extra_anims=None):
         extra_anims = [] if extra_anims is None else extra_anims
         if len(self) > 2:
-            extra_anims.append(ApplyMethod(
-                self.shift,
-                DOWN * new_frame.get_height() + DOWN * SMALL_BUFF
-            ))
+            extra_anims.append(
+                ApplyMethod(self.shift,
+                            DOWN * new_frame.get_height() + DOWN * SMALL_BUFF))
         new_frame.next_to(self[-1], UP, buff=SMALL_BUFF)
         prev_code = self[-1].code
         if prev_code != new_frame.code:
@@ -129,7 +132,8 @@ class CallStack(VGroup):
         else:
             scene.play(
                 *extra_anims,
-                new_frame.code.highlight_lines, 1,
+                new_frame.code.highlight_lines,
+                1,
                 FadeInFrom(new_frame, UP),
                 MaintainPositionRelativeTo(new_frame, self[-1]),
             )
@@ -140,13 +144,13 @@ class CallStack(VGroup):
         self.remove(current_frame)
         anim_stack_shift = []
         if len(self) > 2:
-            anim_stack_shift.append(ApplyMethod(
-                self.shift,
-                UP * current_frame.get_height() + UP * SMALL_BUFF
-            ))
+            anim_stack_shift.append(
+                ApplyMethod(self.shift,
+                            UP * current_frame.get_height() + UP * SMALL_BUFF))
         caller_frame = self[-1]
         if caller_frame.code != current_frame.code:
-            hr_returner, hr_returnee = current_frame.code.setup_for_return(caller_frame.code)
+            hr_returner, hr_returnee = current_frame.code.setup_for_return(
+                caller_frame.code)
             scene.play(
                 ReplacementTransform(hr_returner, hr_returnee, path_arc=np.pi),
                 caller_frame.code.highlight_returnee,
@@ -157,5 +161,6 @@ class CallStack(VGroup):
             scene.play(
                 *anim_stack_shift,
                 FadeOutAndShift(current_frame, UP),
-                caller_frame.code.highlight_lines, caller_frame.line,
+                caller_frame.code.highlight_lines,
+                caller_frame.line,
             )

@@ -26,7 +26,11 @@ class MergeSortScenes(Scene):
     def merge_level_extra_end(self, index, extra):
         pass
 
-    def merge_level(self, current_level, height, buff=SMALL_BUFF, speedy=False):
+    def merge_level(self,
+                    current_level,
+                    height,
+                    buff=SMALL_BUFF,
+                    speedy=False):
         new_level = VGroup()
         self.merge_current_level += 1
         for i in range(0, len(current_level), 2):
@@ -37,7 +41,8 @@ class MergeSortScenes(Scene):
                 orig_group = VGroup(left, right)
                 left = left.deepcopy()  # Leave the old ones in place, unharmed
                 right = right.deepcopy()
-                merged = Array([None] * (len(left.values) + len(right.values)), show_labels=False)
+                merged = Array([None] * (len(left.values) + len(right.values)),
+                               show_labels=False)
                 if height > 3:
                     merged.to_edge(TOP, buff=0.4)
                 else:
@@ -45,26 +50,38 @@ class MergeSortScenes(Scene):
                 halves = VGroup(left, right)
                 if speedy:
                     self.play(
-                        halves.arrange, RIGHT, {'buff': LARGE_BUFF},
-                        halves.next_to, merged, DOWN,
+                        halves.arrange,
+                        RIGHT,
+                        {'buff': LARGE_BUFF},
+                        halves.next_to,
+                        merged,
+                        DOWN,
                         ShowCreation(merged),
                         run_time=self.merge_runtime,
                     )
                 else:
                     self.play(
-                        halves.arrange, RIGHT, {'buff': LARGE_BUFF},
-                        halves.next_to, merged, DOWN,
+                        halves.arrange,
+                        RIGHT,
+                        {'buff': LARGE_BUFF},
+                        halves.next_to,
+                        merged,
+                        DOWN,
                         run_time=self.merge_runtime,
                     )
                     self.play(ShowCreation(merged))
                 self.animate_merge(left, right, merged)
-                self.play(merged.next_to, orig_group, UP, {'buff': buff},
+                self.play(merged.next_to,
+                          orig_group,
+                          UP, {'buff': buff},
                           run_time=self.merge_runtime)
                 self.merge_level_pair_end(i)
             else:
                 self.merge_level_extra_begin(i, current_level[i])
                 merged = current_level[i].deepcopy()
-                self.play(merged.next_to, current_level[i], UP, {'buff': buff},
+                self.play(merged.next_to,
+                          current_level[i],
+                          UP, {'buff': buff},
                           run_time=self.merge_runtime)
                 self.merge_level_extra_end(i, merged)
             new_level.add(merged)
@@ -75,7 +92,8 @@ class MergeSortScenes(Scene):
         self.merge_element_count += 1
         sec = src.elements[si.get_value()].copy()
         self.play(
-            sec.move_to, dest.elements[di.get_value()],
+            sec.move_to,
+            dest.elements[di.get_value()],
             run_time=self.merge_runtime,
         )
         dest.elements.submobjects[di.get_value()] = sec
@@ -95,20 +113,27 @@ class MergeSortScenes(Scene):
         self.wait()
         return left_l, right_r, merged_m
 
-    def cleanup_animate_merge(self, left, left_l, right, right_r, merged, merged_m):
+    def cleanup_animate_merge(self, left, left_l, right, right_r, merged,
+                              merged_m):
         self.play(
-            Uncreate(left_l), Uncreate(right_r), Uncreate(merged_m),
+            Uncreate(left_l),
+            Uncreate(right_r),
+            Uncreate(merged_m),
         )
         left.remove_index(left_l)
         right.remove(right_r)
         merged.remove_index(merged_m)
-        self.play(FadeOutAndShift(left, UP + RIGHT), FadeOutAndShift(right, UP + LEFT))
+        self.play(FadeOutAndShift(left, UP + RIGHT),
+                  FadeOutAndShift(right, UP + LEFT))
 
     def animate_merge(self, left, right, merged):
-        left_l, right_r, merged_m = self.setup_animate_merge(left, right, merged)
+        left_l, right_r, merged_m = self.setup_animate_merge(
+            left, right, merged)
 
-        while left_l.get_value() < len(left.values) and right_r.get_value() < len(right.values):
-            if left.values[left_l.get_value()] <= right.values[right_r.get_value()]:
+        while left_l.get_value() < len(
+                left.values) and right_r.get_value() < len(right.values):
+            if left.values[left_l.get_value()] <= right.values[
+                    right_r.get_value()]:
                 self.animate_merge_element(left, left_l, merged, merged_m)
             else:
                 self.animate_merge_element(right, right_r, merged, merged_m)
@@ -119,7 +144,8 @@ class MergeSortScenes(Scene):
         while right_r.get_value() < len(right.values):
             self.animate_merge_element(right, right_r, merged, merged_m)
 
-        self.cleanup_animate_merge(left, left_l, right, right_r, merged, merged_m)
+        self.cleanup_animate_merge(left, left_l, right, right_r, merged,
+                                   merged_m)
 
 
 # - Why make this movie?
@@ -157,8 +183,10 @@ class MergeIntro(MergeSortScenes):
         # * Where does the sorting happen?
         # * Visualizing the merge
         f1 = TextMobject("We'll focus on just two things:")
-        f1.to_edge(LEFT)  # Leave room on the right for an animation added in iMovie
-        bl = BulletedList('where does the sorting happen?', 'visualizing the merge',
+        f1.to_edge(
+            LEFT)  # Leave room on the right for an animation added in iMovie
+        bl = BulletedList('where does the sorting happen?',
+                          'visualizing the merge',
                           buff=MED_SMALL_BUFF)
         bl.next_to(f1, DOWN, aligned_edge=LEFT).shift(RIGHT)
         self.play(FadeInFromDown(f1))
@@ -168,7 +196,8 @@ class MergeIntro(MergeSortScenes):
         self.play(FadeInFromDown(bl[1]))
         self.wait(duration=2)
 
-        q1 = TextMobject('So lets get started with a seemingly simple question...')
+        q1 = TextMobject(
+            'So lets get started with a seemingly simple question...')
         q1.shift(UP)
         self.play(ReplacementTransform(VGroup(*self.mobjects), q1))
         self.wait(duration=2)
@@ -215,15 +244,26 @@ class MergeFirstExample(MergeSortScenes):
         # Someone nice sorted them for us, and for now we'll just accept that and not worry about
         # how they did it.
         if skip_to < 1:
-            self.play(LaggedStartMap(CircleIndicate, left.elements, run_time=2, lag_ration=0.7))
-            self.play(LaggedStartMap(CircleIndicate, right.elements, run_time=2, lag_ration=0.7))
+            self.play(
+                LaggedStartMap(CircleIndicate,
+                               left.elements,
+                               run_time=2,
+                               lag_ration=0.7))
+            self.play(
+                LaggedStartMap(CircleIndicate,
+                               right.elements,
+                               run_time=2,
+                               lag_ration=0.7))
             self.wait()
 
         # So now we have "one job": combine two sorted arrays into one sorted array.
         # To do that, we need space for the result. We'll make an empty array to hold them all.
         merged.shift(UP * 1.5)
         self.play(
-            halves.next_to, merged, DOWN, MED_LARGE_BUFF,
+            halves.next_to,
+            merged,
+            DOWN,
+            MED_LARGE_BUFF,
             FadeInFromDown(merged),
         )
         self.wait()
@@ -233,8 +273,7 @@ class MergeFirstExample(MergeSortScenes):
 
         # So grab the first from each half, which is the smallest in each since the halves are
         # already sorted.
-        self.play(left.shift, LEFT * 2.5,
-                  right.shift, RIGHT * 2.5)
+        self.play(left.shift, LEFT * 2.5, right.shift, RIGHT * 2.5)
         comp = TexMobject('left', '<=', 'right')
         comp.next_to(merged, BOTTOM, SMALL_BUFF)
         self.play(Write(comp))
@@ -242,7 +281,8 @@ class MergeFirstExample(MergeSortScenes):
 
         comp_text = TextMobject('left[l]', ' <= ', 'right[r]')
         comp_text.next_to(merged, BOTTOM, SMALL_BUFF)
-        code_image_main = ImageMobject('merge_sort/merge_code_main_loop', height=2.2)
+        code_image_main = ImageMobject('merge_sort/merge_code_main_loop',
+                                       height=2.2)
         code_image_main.to_edge(BOTTOM, buff=0.01)
         self.play(ReplacementTransform(comp, comp_text),
                   FadeIn(code_image_main))
@@ -259,13 +299,16 @@ class MergeFirstExample(MergeSortScenes):
         merged_m = merged.create_index(0, color=YELLOW, name='m', position=UP)
         self.play(
             ShowCreation(merged_m),
-            t1.to_edge, UP, {'buff': SMALL_BUFF},
+            t1.to_edge,
+            UP,
+            {'buff': SMALL_BUFF},
         )
         self.wait()
 
         llo = -1
         rro = -1
-        while left_l.get_value() < len(left.values) and right_r.get_value() < len(right.values):
+        while left_l.get_value() < len(
+                left.values) and right_r.get_value() < len(right.values):
             self.merge_element_count += 1
 
             if self.merge_element_count == 3:
@@ -280,12 +323,16 @@ class MergeFirstExample(MergeSortScenes):
                 rro = rr
                 rc = right.elements[rr].copy()
             if comp_text[0] != lc:
-                self.play(lc.move_to, comp_text[0],
-                          Uncreate(comp_text[0]), run_time=self.merge_runtime)
+                self.play(lc.move_to,
+                          comp_text[0],
+                          Uncreate(comp_text[0]),
+                          run_time=self.merge_runtime)
                 comp_text.submobjects[0] = lc
             if comp_text[2] != rc:
-                self.play(rc.move_to, comp_text[2],
-                          Uncreate(comp_text[2]), run_time=self.merge_runtime)
+                self.play(rc.move_to,
+                          comp_text[2],
+                          Uncreate(comp_text[2]),
+                          run_time=self.merge_runtime)
                 comp_text.submobjects[2] = rc
             self.wait(duration=self.merge_runtime)
 
@@ -301,40 +348,42 @@ class MergeFirstExample(MergeSortScenes):
                 dups_text = TextMobject('dups favor the left!')
                 dups_text.next_to(comp_text, DOWN)
                 sr = SurroundingRectangle(VGroup(*comp_text))
-                self.play(FadeIn(sr),
-                          FadeInFromDown(dups_text),
-                          )
+                self.play(
+                    FadeIn(sr),
+                    FadeInFromDown(dups_text),
+                )
                 self.wait()
                 self.play(FadeOut(dups_text), FadeOut(sr))
 
             # Compare them. Show the comparison and circle the smaller one.
-            if left.values[left_l.get_value()] <= right.values[right_r.get_value()]:
+            if left.values[left_l.get_value()] <= right.values[
+                    right_r.get_value()]:
                 self.play(CircleIndicate(lc), run_time=self.merge_runtime)
                 # Move the smaller one into place.
                 lc = lc.copy()
-                self.play(lc.move_to, merged.elements[merged_m.get_value()],
+                self.play(lc.move_to,
+                          merged.elements[merged_m.get_value()],
                           run_time=self.merge_runtime)
                 merged.elements.submobjects[merged_m.get_value()] = lc
                 self.wait(duration=self.merge_runtime)
                 self.play(
                     *left_l.animate_set_index(left_l.get_value() + 1),
                     *merged_m.animate_set_index(merged_m.get_value() + 1),
-                    run_time=self.merge_runtime
-                )
+                    run_time=self.merge_runtime)
                 self.wait(duration=self.merge_runtime)
             else:
                 self.play(CircleIndicate(rc), run_time=self.merge_runtime)
                 # Move the smaller one into place.
                 rc = rc.copy()
-                self.play(rc.move_to, merged.elements[merged_m.get_value()],
+                self.play(rc.move_to,
+                          merged.elements[merged_m.get_value()],
                           run_time=self.merge_runtime)
                 merged.elements.submobjects[merged_m.get_value()] = rc
                 self.wait(duration=self.merge_runtime)
                 self.play(
                     *right_r.animate_set_index(right_r.get_value() + 1),
                     *merged_m.animate_set_index(merged_m.get_value() + 1),
-                    run_time=self.merge_runtime
-                )
+                    run_time=self.merge_runtime)
                 self.wait(duration=self.merge_runtime)
             if skip_to >= 2:
                 break
@@ -351,7 +400,8 @@ class MergeFirstExample(MergeSortScenes):
 
         cleanup_text = TextMobject('Left is done,\\\\so finish right...')
         cleanup_text.next_to(merged, BOTTOM, SMALL_BUFF)
-        code_image_cleanup = ImageMobject('merge_sort/merge_code_cleanup_loops', height=2.2)
+        code_image_cleanup = ImageMobject(
+            'merge_sort/merge_code_cleanup_loops', height=2.2)
         code_image_cleanup.to_edge(BOTTOM, buff=0.01)
         self.play(
             FadeInFromDown(cleanup_text),
@@ -371,10 +421,8 @@ class MergeFirstExample(MergeSortScenes):
             if skip_to >= 3:
                 break
 
-        self.play(
-            Uncreate(left_l), Uncreate(right_r), Uncreate(merged_m),
-            Uncreate(cleanup_text)
-        )
+        self.play(Uncreate(left_l), Uncreate(right_r), Uncreate(merged_m),
+                  Uncreate(cleanup_text))
         left.remove_index(left_l)
         right.remove(right_r)
         merged.remove_index(merged_m)
@@ -383,14 +431,16 @@ class MergeFirstExample(MergeSortScenes):
         # This is the core of the merge algorithm shown in the book, but rewritten.
         t2 = TextMobject('Merged two arrays of 4 into one array of 8')
         t2.to_edge(UP)
-        code_image_full = ImageMobject('merge_sort/merge_code_full', height=4.0)
+        code_image_full = ImageMobject('merge_sort/merge_code_full',
+                                       height=4.0)
         code_image_full.scale(1.2)
         code_image_full.to_edge(RIGHT)
         merged.generate_target(use_deepcopy=True)
         merged.target.to_edge(LEFT)
         left.generate_target(use_deepcopy=True)
         right.generate_target(use_deepcopy=True)
-        g = VGroup(left.target, right.target).arrange(RIGHT, buff=MED_LARGE_BUFF)
+        g = VGroup(left.target, right.target).arrange(RIGHT,
+                                                      buff=MED_LARGE_BUFF)
         g.next_to(merged.target, DOWN, buff=MED_LARGE_BUFF)
 
         self.play(
@@ -407,8 +457,7 @@ class MergeFirstExample(MergeSortScenes):
             r"\item[*]This code is different than what's in the book.\\"
             r"Study both and see which feels better to you!"
             r"\end{enumerate}",
-            alignment=""
-        )
+            alignment="")
         code_expl.scale(0.7).next_to(code_image_full, DOWN, aligned_edge=LEFT)
         self.play(FadeInFromDown(code_expl))
         self.wait(duration=3)
@@ -426,7 +475,9 @@ class MergeBaseCase(MergeSortScenes):
         #   - Seems like "duh", but it's important.
         # An array size of 1 represents the "base case" for recursive merge sorts.
 
-        t1 = TextMobject('Now we know how to merge\\\\smaller, sorted arrays into larger ones.')
+        t1 = TextMobject(
+            'Now we know how to merge\\\\smaller, sorted arrays into larger ones.'
+        )
         self.play(FadeInFromDown(t1))
         self.wait(duration=3)
 
@@ -440,8 +491,10 @@ class MergeBaseCase(MergeSortScenes):
 
         colors = [GREEN, YELLOW_D, PINK, BLUE]
         nums = [4, 12, 7]
-        all_singles = VGroup(*[Array([n], show_labels=False, element_color=c)
-                               for n, c in zip(nums, colors)])
+        all_singles = VGroup(*[
+            Array([n], show_labels=False, element_color=c)
+            for n, c in zip(nums, colors)
+        ])
         all_singles.arrange(RIGHT, buff=LARGE_BUFF * 3)
         all_taglines = VGroup(
             TextMobject('This array is sorted...'),
@@ -450,7 +503,8 @@ class MergeBaseCase(MergeSortScenes):
         )
         all_offsets = [UP, ORIGIN, DOWN]
         self.play(
-            t3.to_edge, UP,
+            t3.to_edge,
+            UP,
         )
         for a, t, o in zip(all_singles, all_taglines, all_offsets):
             a.shift(o)
@@ -475,8 +529,9 @@ class MergeBaseCase(MergeSortScenes):
         )
         self.wait()
 
-        t5 = TextMobject(r"This forms the ``\textbf{base case}'' for all merge sorts.",
-                         tex_to_color_map={'base case': GREEN})
+        t5 = TextMobject(
+            r"This forms the ``\textbf{base case}'' for all merge sorts.",
+            tex_to_color_map={'base case': GREEN})
         t5.next_to(t4, DOWN, buff=MED_LARGE_BUFF)
         self.play(Write(t5))
         self.wait(duration=2)
@@ -496,8 +551,10 @@ class Merge4(MergeSortScenes):
 
         colors = [RED, BLUE, GREEN, YELLOW_D]
         nums = [4, 3, 1, 7]
-        all_singles = VGroup(*[Array([n], show_labels=False, element_color=c)
-                               for n, c in zip(nums, colors)])
+        all_singles = VGroup(*[
+            Array([n], show_labels=False, element_color=c)
+            for n, c in zip(nums, colors)
+        ])
         all_singles.arrange(RIGHT, buff=0)
         t1 = TextMobject('So start with an array of random numbers...')
         t1.to_edge(TOP)
@@ -522,13 +579,18 @@ class Merge4(MergeSortScenes):
         self.play(ReplacementTransform(t2, level_labels[0].to_edge(LEFT)))
         self.wait()
 
-        self.play(VGroup(all_singles, level_labels[0]).to_edge, BOTTOM, {'buff': SMALL_BUFF})
+        self.play(
+            VGroup(all_singles, level_labels[0]).to_edge, BOTTOM,
+            {'buff': SMALL_BUFF})
         self.wait()
 
         current_level = all_singles
         all_levels = [current_level]
         while len(current_level) > 1:
-            current_level = self.merge_level(current_level, 0, buff=MED_LARGE_BUFF, speedy=True)
+            current_level = self.merge_level(current_level,
+                                             0,
+                                             buff=MED_LARGE_BUFF,
+                                             speedy=True)
             ll = level_labels[len(all_levels)]
             ll.next_to(current_level, LEFT).to_edge(LEFT)
             self.play(Write(ll))
@@ -546,20 +608,36 @@ class Merge4(MergeSortScenes):
         show_labels = True
         if self.merge_current_level > 1:
             show_labels = False
-        left_l = left.create_index(0, color=YELLOW, name='l', show_label=show_labels)
-        right_r = right.create_index(0, color=YELLOW, name='r', show_label=show_labels)
-        merged_m = merged.create_index(0, color=YELLOW, name='m', position=UP, show_label=show_labels)
-        self.play(FadeIn(left_l), FadeIn(right_r), FadeIn(merged_m),
+        left_l = left.create_index(0,
+                                   color=YELLOW,
+                                   name='l',
+                                   show_label=show_labels)
+        right_r = right.create_index(0,
+                                     color=YELLOW,
+                                     name='r',
+                                     show_label=show_labels)
+        merged_m = merged.create_index(0,
+                                       color=YELLOW,
+                                       name='m',
+                                       position=UP,
+                                       show_label=show_labels)
+        self.play(FadeIn(left_l),
+                  FadeIn(right_r),
+                  FadeIn(merged_m),
                   run_time=0.5)
         return left_l, right_r, merged_m
 
-    def cleanup_animate_merge(self, left, left_l, right, right_r, merged, merged_m):
+    def cleanup_animate_merge(self, left, left_l, right, right_r, merged,
+                              merged_m):
         left.remove_index(left_l)
         right.remove(right_r)
         merged.remove_index(merged_m)
-        self.play(FadeOut(left_l), FadeOut(right_r), FadeOut(merged_m),
+        self.play(FadeOut(left_l),
+                  FadeOut(right_r),
+                  FadeOut(merged_m),
                   run_time=0.5)
-        self.play(FadeOutAndShift(left, UP + RIGHT), FadeOutAndShift(right, UP + LEFT))
+        self.play(FadeOutAndShift(left, UP + RIGHT),
+                  FadeOutAndShift(right, UP + LEFT))
 
 
 # Now show the big merge
@@ -578,30 +656,37 @@ class Merge11(MergeSortScenes):
     def construct(self):
         n = 11
 
-        t1 = TextMobject("Let's do a bigger merge, with an odd number of elements")
+        t1 = TextMobject(
+            "Let's do a bigger merge, with an odd number of elements")
         self.play(FadeInFromDown(t1))
         self.wait()
 
         np.random.seed(42)
         colors = color_gradient([PINK, BLUE, YELLOW_D], 20)
-        all_singles = VGroup(*[Array([n], show_labels=False, element_color=colors[n])
-                               for i, n in enumerate(np.random.randint(0, 20, n))])
+        all_singles = VGroup(*[
+            Array([n], show_labels=False, element_color=colors[n])
+            for i, n in enumerate(np.random.randint(0, 20, n))
+        ])
         all_singles.arrange(RIGHT, buff=MED_SMALL_BUFF)
         t2 = TextMobject(str(n) + " numbers...")
         t2.next_to(all_singles, UP, buff=MED_LARGE_BUFF)
         self.play(FadeOutAndShift(t1, UP))
-        self.play(ShowCreation(all_singles),
-                  FadeIn(t2))
+        self.play(ShowCreation(all_singles), FadeIn(t2))
         self.wait()
 
-        b = BraceLabel(VGroup(*all_singles[-3:]), 'Watch the last 3', brace_direction=UP,
+        b = BraceLabel(VGroup(*all_singles[-3:]),
+                       'Watch the last 3',
+                       brace_direction=UP,
                        label_constructor=TextMobject)
         self.play(ShowCreation(b), FadeOutAndShift(t2, UP))
         self.wait()
 
-        self.play(all_singles.to_edge, BOTTOM, {'buff': MED_SMALL_BUFF},
-                  # FadeOutAndShift(t2, UP),
-                  FadeOutAndShift(b, UP))
+        self.play(
+            all_singles.to_edge,
+            BOTTOM,
+            {'buff': MED_SMALL_BUFF},
+            # FadeOutAndShift(t2, UP),
+            FadeOutAndShift(b, UP))
         self.wait()
 
         current_level = all_singles
@@ -611,18 +696,22 @@ class Merge11(MergeSortScenes):
         while len(current_level) > 1:
             if len(all_levels) == squish_start_height:
                 g = VGroup(*all_levels[:-1])
-                self.play(g.scale, 0.8,
-                          g.to_edge, BOTTOM, {'buff': SMALL_BUFF})
-                self.play(all_levels[-1].next_to, all_levels[-2], UP, {'buff': MED_SMALL_BUFF})
+                self.play(g.scale, 0.8, g.to_edge, BOTTOM,
+                          {'buff': SMALL_BUFF})
+                self.play(all_levels[-1].next_to, all_levels[-2], UP,
+                          {'buff': MED_SMALL_BUFF})
             if len(all_levels) > squish_start_height:
-                self.play(all_levels[-2].scale, 0.8,
-                          all_levels[-2].next_to, all_levels[-3], UP, {'buff': SMALL_BUFF})
-                self.play(all_levels[-1].next_to, all_levels[-2], UP, {'buff': SMALL_BUFF})
+                self.play(all_levels[-2].scale, 0.8, all_levels[-2].next_to,
+                          all_levels[-3], UP, {'buff': SMALL_BUFF})
+                self.play(all_levels[-1].next_to, all_levels[-2], UP,
+                          {'buff': SMALL_BUFF})
 
             self.level_element_count = 0
             self.merge_runtime = level_runtimes[self.merge_current_level]
-            current_level = self.merge_level(current_level, len(all_levels),
-                                             buff=MED_SMALL_BUFF, speedy=True)
+            current_level = self.merge_level(current_level,
+                                             len(all_levels),
+                                             buff=MED_SMALL_BUFF,
+                                             speedy=True)
             all_levels.append(current_level)
 
         merge_result = VGroup(*all_levels)
@@ -659,12 +748,17 @@ class Merge11(MergeSortScenes):
         dups_from_left.generate_target(use_deepcopy=True)
         right_dup_fill_color = YELLOW
         dup_opacity = 0.2
-        dups_from_left.target[1].backgrounds[1].set_fill(right_dup_fill_color, dup_opacity)
-        dups_from_left.target[1].backgrounds[2].set_fill(right_dup_fill_color, dup_opacity)
-        dups_from_left.target[2].backgrounds[4].set_fill(right_dup_fill_color, dup_opacity)
-        dups_from_left.target[2].backgrounds[7].set_fill(right_dup_fill_color, dup_opacity)
+        dups_from_left.target[1].backgrounds[1].set_fill(
+            right_dup_fill_color, dup_opacity)
+        dups_from_left.target[1].backgrounds[2].set_fill(
+            right_dup_fill_color, dup_opacity)
+        dups_from_left.target[2].backgrounds[4].set_fill(
+            right_dup_fill_color, dup_opacity)
+        dups_from_left.target[2].backgrounds[7].set_fill(
+            right_dup_fill_color, dup_opacity)
 
-        dfl_t = TextMobject("Duplicates favor the left - merge sort is ``stable''")
+        dfl_t = TextMobject(
+            "Duplicates favor the left - merge sort is ``stable''")
         dfl_t.next_to(dups_from_left.target, DOWN)
         dfl_g = VGroup(dups_from_left.target, dfl_t)
         dfl_g.next_to(VGroup(oea_g, ttf_g), DOWN, buff=LARGE_BUFF)
@@ -682,19 +776,30 @@ class Merge11(MergeSortScenes):
 
     def setup_animate_merge(self, left, right, merged):
         left_l = left.create_index(0, color=YELLOW, name='l', show_label=False)
-        right_r = right.create_index(0, color=YELLOW, name='r', show_label=False)
-        merged_m = merged.create_index(0, color=YELLOW, name='m', position=UP, show_label=False)
+        right_r = right.create_index(0,
+                                     color=YELLOW,
+                                     name='r',
+                                     show_label=False)
+        merged_m = merged.create_index(0,
+                                       color=YELLOW,
+                                       name='m',
+                                       position=UP,
+                                       show_label=False)
         # self.play(FadeIn(left_l), FadeIn(right_r), FadeIn(merged_m),
         #           run_time=0.5)
         self.add(left_l, right_r, merged_m)
         return left_l, right_r, merged_m
 
-    def cleanup_animate_merge(self, left, left_l, right, right_r, merged, merged_m):
+    def cleanup_animate_merge(self, left, left_l, right, right_r, merged,
+                              merged_m):
         left.remove_index(left_l)
         right.remove(right_r)
         merged.remove_index(merged_m)
-        self.play(FadeOut(left_l), FadeOut(right_r), FadeOut(merged_m),
-                  FadeOutAndShift(left, UP + RIGHT), FadeOutAndShift(right, UP + LEFT),
+        self.play(FadeOut(left_l),
+                  FadeOut(right_r),
+                  FadeOut(merged_m),
+                  FadeOutAndShift(left, UP + RIGHT),
+                  FadeOutAndShift(right, UP + LEFT),
                   run_time=self.merge_runtime)
 
     def merge_level_pair_begin(self, index):
@@ -740,8 +845,10 @@ class MergeNSpeedyClean(MergeSortScenes):
         n = 9
         np.random.seed(41)
         colors = color_gradient([PINK, BLUE, YELLOW_D], 20)
-        all_singles = VGroup(*[Array([n], show_labels=False, element_color=colors[n])
-                               for i, n in enumerate(np.random.randint(0, 20, n))])
+        all_singles = VGroup(*[
+            Array([n], show_labels=False, element_color=colors[n])
+            for i, n in enumerate(np.random.randint(0, 20, n))
+        ])
         all_singles.arrange(RIGHT, buff=MED_SMALL_BUFF)
         all_singles.to_edge(BOTTOM, buff=SMALL_BUFF)
         self.play(ShowCreation(all_singles))
@@ -750,8 +857,10 @@ class MergeNSpeedyClean(MergeSortScenes):
         all_levels = [current_level]
         self.merge_runtime = 0.5
         while len(current_level) > 1:
-            current_level = self.merge_level(current_level, len(all_levels),
-                                             buff=MED_SMALL_BUFF, speedy=True)
+            current_level = self.merge_level(current_level,
+                                             len(all_levels),
+                                             buff=MED_SMALL_BUFF,
+                                             speedy=True)
             all_levels.append(current_level)
 
         self.wait(duration=2)
@@ -763,12 +872,16 @@ class MergeNSpeedyClean(MergeSortScenes):
         self.add(left_l, right_r, merged_m)
         return left_l, right_r, merged_m
 
-    def cleanup_animate_merge(self, left, left_l, right, right_r, merged, merged_m):
+    def cleanup_animate_merge(self, left, left_l, right, right_r, merged,
+                              merged_m):
         left.remove_index(left_l)
         right.remove(right_r)
         merged.remove_index(merged_m)
-        self.play(FadeOut(left_l), FadeOut(right_r), FadeOut(merged_m),
-                  FadeOutAndShift(left, UP + RIGHT), FadeOutAndShift(right, UP + LEFT),
+        self.play(FadeOut(left_l),
+                  FadeOut(right_r),
+                  FadeOut(merged_m),
+                  FadeOutAndShift(left, UP + RIGHT),
+                  FadeOutAndShift(right, UP + LEFT),
                   run_time=self.merge_runtime)
 
 
@@ -797,7 +910,6 @@ class MergeNSpeedyClean(MergeSortScenes):
 #     def construct(self):
 #         pass
 
-
 # Consider: merge sorting as a streaming example
 # - What if you were given two infinite streams of sorted data?
 # - Show this as streams shifting in and out.
@@ -806,7 +918,3 @@ class MergeNSpeedyClean(MergeSortScenes):
 # class MergeStreaming(MergeSortScenes):
 #     def construct(self):
 #         pass
-
-
-
-

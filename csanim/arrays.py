@@ -39,7 +39,8 @@ class ArrayIndex(VGroup):
 
     def add_indicator_box(self):
         box = Rectangle(width=self.width - 0.1, height=self.height - 0.1)
-        box.set_stroke(color=self.color, opacity=self.get_box_opacity(self.get_value()))
+        box.set_stroke(color=self.color,
+                       opacity=self.get_box_opacity(self.get_value()))
         box.move_to(self.get_box_target(self.get_value()))
         return box
 
@@ -51,9 +52,13 @@ class ArrayIndex(VGroup):
 
     def get_arrow(self):
         if self.label.get_y() < self.indicator_box.get_y():
-            a = Arrow(self.label.get_top(), self.indicator_box.get_bottom(), buff=MED_SMALL_BUFF)
+            a = Arrow(self.label.get_top(),
+                      self.indicator_box.get_bottom(),
+                      buff=MED_SMALL_BUFF)
         else:
-            a = Arrow(self.label.get_bottom(), self.indicator_box.get_top(), buff=MED_SMALL_BUFF)
+            a = Arrow(self.label.get_bottom(),
+                      self.indicator_box.get_top(),
+                      buff=MED_SMALL_BUFF)
         return a
 
     def set_index(self, value):
@@ -80,9 +85,15 @@ class ArrayIndex(VGroup):
 
     def animate_set_index(self, value):
         return [
-            self.indicator_box.set_stroke, {'opacity': self.get_box_opacity(value), 'family': False},
-            self.indicator_box.move_to, self.get_box_target(value),
-            self.index_tracker.set_value, value,
+            self.indicator_box.set_stroke,
+            {
+                'opacity': self.get_box_opacity(value),
+                'family': False
+            },
+            self.indicator_box.move_to,
+            self.get_box_target(value),
+            self.index_tracker.set_value,
+            value,
         ]
 
     def get_value(self):
@@ -122,7 +133,8 @@ class Array(VGroup):
         separators = VGroup()
         for i in range(1, len(self.values)):
             x = i * self.element_width
-            separators.add(Line([x, -self.hh, 0], [x, self.hh, 0], stroke_width=2))
+            separators.add(
+                Line([x, -self.hh, 0], [x, self.hh, 0], stroke_width=2))
         separators.shift(LEFT * self.left_edge_offset)
         self.add(separators)
 
@@ -136,7 +148,8 @@ class Array(VGroup):
                 t = TexMobject('.', width=0, height=0, color=BLACK)
             t.move_to(i * RIGHT * self.element_width)
             self.elements.add(t)
-            b = Rectangle(width=self.element_width - 0.1, height=self.element_height - 0.1)
+            b = Rectangle(width=self.element_width - 0.1,
+                          height=self.element_height - 0.1)
             b.set_stroke(color=BLACK, opacity=0)
             b.move_to(t.get_center())
             self.backgrounds.add(b)
@@ -158,10 +171,16 @@ class Array(VGroup):
             self.add(self.labels)
 
     def create_bounding_box(self):
-        return Rectangle(width=self.total_width, height=self.element_height, stroke_width=2)
+        return Rectangle(width=self.total_width,
+                         height=self.element_height,
+                         stroke_width=2)
 
     def create_index(self, value, **kwargs):
-        i = ArrayIndex(self, value, width=self.element_width, height=self.element_height, **kwargs)
+        i = ArrayIndex(self,
+                       value,
+                       width=self.element_width,
+                       height=self.element_height,
+                       **kwargs)
         self.add(i)
         return i
 

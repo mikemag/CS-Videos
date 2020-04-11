@@ -12,8 +12,10 @@ class FACIntro(Scene):
         self.wait(duration=0.5)
 
         # Background information on call stacks, foundation for other concepts which build upon this.
-        t2 = TextMobject("Learning the basics of the ``call stack'' helps with\\\\many "
-                         'concepts in CS:', alignment='').shift(UP)
+        t2 = TextMobject(
+            "Learning the basics of the ``call stack'' helps with\\\\many "
+            'concepts in CS:',
+            alignment='').shift(UP)
         bl = BulletedList('pass-by-value vs. pass-by-reference',
                           'passing object references',
                           'recursion',
@@ -38,19 +40,22 @@ class FACStack(Scene):
 
         # - Foo calls bar passing some args. Bar does something, returns.
         code_scale = 0.75
-        main_code = CodeBlock('Java', r"""
+        main_code = CodeBlock(
+            'Java', r"""
             public static
             void main(String[] args) {
                 foo();
             }
             """).scale(code_scale)
-        foo_code = CodeBlock('Java', r"""
+        foo_code = CodeBlock(
+            'Java', r"""
             static int foo() {
                 int n = bar(1, 2);
                 return n;
             }
             """).scale(code_scale)
-        bar_code = CodeBlock('Java', r"""
+        bar_code = CodeBlock(
+            'Java', r"""
             static int bar(int x,
                            int y) {
                 int a = x + y;
@@ -71,8 +76,7 @@ class FACStack(Scene):
 
         # Let's write down what happens when we run this.
         t2 = TextMobject("Let's run them and write down\\\\"
-                         "each variable as we go..."
-                         )
+                         "each variable as we go...")
         t2.to_edge(LEFT)
         self.play(Write(t2), fbg.to_edge, RIGHT, {'buff': MED_SMALL_BUFF})
         self.wait()
@@ -113,11 +117,13 @@ class FACStack(Scene):
         foo_code.move_highlight_rect(2)
         self.play(
             FadeOut(t5),
-            foo_code.highlight_lines, 2,
+            foo_code.highlight_lines,
+            2,
         )
         self.wait()
 
-        foo_n_q = TexMobject('?').move_to(foo_vars[0][1], aligned_edge=BOTTOM).shift(UP * 0.1)
+        foo_n_q = TexMobject('?').move_to(foo_vars[0][1],
+                                          aligned_edge=BOTTOM).shift(UP * 0.1)
         self.play(Write(foo_n_q))
         foo_vars.add(foo_n_q)
         self.wait()
@@ -130,24 +136,34 @@ class FACStack(Scene):
         bar_code.complete_callee(hr_callee, self)
         self.wait()
 
-        bar_x = TexMobject('1').move_to(bar_vars[0][1], aligned_edge=BOTTOM).shift(UP * 0.1)
-        bar_y = TexMobject('2').move_to(bar_vars[1][1], aligned_edge=BOTTOM).shift(UP * 0.1)
-        a = Arrow(bar_code.code_string().get_line(2), VGroup(bar_x, bar_y).get_right(), stroke_width=3)
+        bar_x = TexMobject('1').move_to(bar_vars[0][1],
+                                        aligned_edge=BOTTOM).shift(UP * 0.1)
+        bar_y = TexMobject('2').move_to(bar_vars[1][1],
+                                        aligned_edge=BOTTOM).shift(UP * 0.1)
+        a = Arrow(bar_code.code_string().get_line(2),
+                  VGroup(bar_x, bar_y).get_right(),
+                  stroke_width=3)
         self.play(Write(bar_x), Write(bar_y), ShowCreationThenDestruction(a))
         bar_vars_extras = VGroup()
         bar_vars_extras.add(bar_x, bar_y)
         self.play(bar_code.highlight_lines, 3)
         self.wait()
 
-        bar_a = TexMobject('3').move_to(bar_vars[2][1], aligned_edge=BOTTOM).shift(UP * 0.1)
-        a = Arrow(bar_code.code_string().get_line(3), bar_a.get_right(), stroke_width=3)
+        bar_a = TexMobject('3').move_to(bar_vars[2][1],
+                                        aligned_edge=BOTTOM).shift(UP * 0.1)
+        a = Arrow(bar_code.code_string().get_line(3),
+                  bar_a.get_right(),
+                  stroke_width=3)
         self.play(Write(bar_a), ShowCreationThenDestruction(a))
         bar_vars_extras.add(bar_a)
         self.play(bar_code.highlight_lines, 4)
         self.wait()
 
-        bar_b = TexMobject('6').move_to(bar_vars[3][1], aligned_edge=BOTTOM).shift(UP * 0.1)
-        a = Arrow(bar_code.code_string().get_line(4), bar_b.get_right(), stroke_width=3)
+        bar_b = TexMobject('6').move_to(bar_vars[3][1],
+                                        aligned_edge=BOTTOM).shift(UP * 0.1)
+        a = Arrow(bar_code.code_string().get_line(4),
+                  bar_b.get_right(),
+                  stroke_width=3)
         self.play(Write(bar_b), ShowCreationThenDestruction(a))
         bar_vars_extras.add(bar_b)
         self.play(bar_code.highlight_lines, 5)
@@ -161,10 +177,14 @@ class FACStack(Scene):
         foo_code.complete_returnee(hr_returnee, self)
         self.wait()
 
-        foo_n = TexMobject('6').move_to(foo_vars[0][1], aligned_edge=BOTTOM).shift(UP * 0.1)
-        a = Arrow(foo_code.code_string().get_line(2), foo_n.get_right(), stroke_width=3)
+        foo_n = TexMobject('6').move_to(foo_vars[0][1],
+                                        aligned_edge=BOTTOM).shift(UP * 0.1)
+        a = Arrow(foo_code.code_string().get_line(2),
+                  foo_n.get_right(),
+                  stroke_width=3)
         self.play(
-            foo_code.highlight_lines, 3,
+            foo_code.highlight_lines,
+            3,
             ReplacementTransform(foo_n_q, foo_n),
             ShowCreationThenDestruction(a),
         )
@@ -179,7 +199,8 @@ class FACStack(Scene):
         self.play(FadeIn(t1), foo_code.fade_out_highlight)
         self.wait(duration=2)
 
-        t2 = TextMobject('Every variable is stored\\\\someplace in memory').to_edge(LEFT)
+        t2 = TextMobject(
+            'Every variable is stored\\\\someplace in memory').to_edge(LEFT)
         new_title = TextMobject('Where are variables stored?').to_edge(UP)
         self.play(
             FadeOut(t1),
@@ -196,7 +217,9 @@ class FACStack(Scene):
 
         def build_var_home(name, value):
             var_name = TextMobject(name)
-            slot_box = Rectangle(height=slot_height, width=slot_width, stroke_width=1)
+            slot_box = Rectangle(height=slot_height,
+                                 width=slot_width,
+                                 stroke_width=1)
             var_value = TextMobject(value)
             var_value.move_to(slot_box)
             var_name.next_to(slot_box, LEFT)
@@ -232,18 +255,27 @@ class FACStack(Scene):
         # - Now arrange the homes into a "stack frame".
         print('Build stack frames')
 
-        t4 = TextMobject("All slots for a function\\\\are put together in a\\\\``frame''")
+        t4 = TextMobject(
+            "All slots for a function\\\\are put together in a\\\\``frame''")
         t4.to_edge(LEFT)
         self.play(FadeOut(t3), FadeIn(t4))
 
         frame_width = 2.8
         foo_vars = [('n', '6')]
-        foo_frame = StackFrame(foo_code, 'foo()', 3, foo_vars, width=frame_width)
+        foo_frame = StackFrame(foo_code,
+                               'foo()',
+                               3,
+                               foo_vars,
+                               width=frame_width)
         foo_frame.move_to(foo_homes, aligned_edge=LEFT).shift(LEFT * .5)
         self.play(ReplacementTransform(foo_homes, foo_frame))
         self.wait()
 
-        bar_frame = StackFrame(bar_code, 'bar(1,2)', 9, bar_var_vals, width=frame_width)
+        bar_frame = StackFrame(bar_code,
+                               'bar(1,2)',
+                               9,
+                               bar_var_vals,
+                               width=frame_width)
         bar_frame.move_to(bar_homes, aligned_edge=LEFT).shift(LEFT * .5)
         self.play(ReplacementTransform(bar_homes, bar_frame))
         self.wait()
@@ -263,19 +295,24 @@ class FACStack(Scene):
         )
         self.wait()
 
-        t7 = TextMobject("On the ``call stack''!").next_to(t6, DOWN, buff=LARGE_BUFF)
+        t7 = TextMobject("On the ``call stack''!").next_to(t6,
+                                                           DOWN,
+                                                           buff=LARGE_BUFF)
         self.play(FadeIn(t7))
         self.wait()
 
         new_title = TextMobject('The Call Stack').to_edge(UP)
         t1 = TextMobject('Function calls push a new frame\\\\onto the stack')\
             .to_edge(LEFT).shift(UP)
-        t2 = TextMobject('Returning pops a frame off\\\\the stack').next_to(t1, DOWN, buff=LARGE_BUFF)
+        t2 = TextMobject('Returning pops a frame off\\\\the stack').next_to(
+            t1, DOWN, buff=LARGE_BUFF)
 
         box_count = 8
         colors = color_gradient([BLUE, ORANGE], box_count)
-        little_boxes = VGroup(*[Rectangle(height=0.25, width=0.75, fill_opacity=1, color=colors[i])
-                                for i in range(box_count)])
+        little_boxes = VGroup(*[
+            Rectangle(height=0.25, width=0.75, fill_opacity=1, color=colors[i])
+            for i in range(box_count)
+        ])
         little_boxes.arrange(UP, buff=0.1)
         little_boxes.next_to(VGroup(foo_code, bar_code), LEFT, buff=LARGE_BUFF)
 
@@ -286,26 +323,30 @@ class FACStack(Scene):
             FadeOut(foo_frame),
             FadeOut(bar_frame),
             FadeIn(t1),
-            LaggedStartMap(FadeInFrom, little_boxes, lambda m: (m, UP), lag_ratio=1.0, run_time=4.0),
+            LaggedStartMap(FadeInFrom,
+                           little_boxes,
+                           lambda m: (m, UP),
+                           lag_ratio=1.0,
+                           run_time=4.0),
         )
         title = new_title
         self.wait()
 
         self.play(
             FadeIn(t2),
-            LaggedStartMap(FadeOutAndShift, VGroup(*reversed(little_boxes)),
-                                                   lambda m: (m, UP), lag_ratio=1.0,
-                                                   run_time=4.0),
+            LaggedStartMap(FadeOutAndShift,
+                           VGroup(*reversed(little_boxes)),
+                           lambda m: (m, UP),
+                           lag_ratio=1.0,
+                           run_time=4.0),
         )
         self.wait(duration=1)
 
-        t3 = TextMobject("Let's run again and see\\\\the call stack in action...").to_edge(LEFT)
+        t3 = TextMobject(
+            "Let's run again and see\\\\the call stack in action...").to_edge(
+                LEFT)
         t3.shift(UP)
-        self.play(
-            FadeOut(t1),
-            FadeOut(t2),
-            FadeIn(t3)
-        )
+        self.play(FadeOut(t1), FadeOut(t2), FadeIn(t3))
         self.wait()
 
         print('Run with real call stack')
@@ -317,9 +358,18 @@ class FACStack(Scene):
         main_code.shift(UP * 3 + RIGHT * 3)
         g = VGroup(main_code, foo_code, bar_code)
         self.play(
-            g.arrange, DOWN, {'aligned_edge': LEFT, 'buff': MED_SMALL_BUFF},
-            g.next_to, title, DOWN, {'buff': MED_SMALL_BUFF},
-            g.to_edge, RIGHT,
+            g.arrange,
+            DOWN,
+            {
+                'aligned_edge': LEFT,
+                'buff': MED_SMALL_BUFF
+            },
+            g.next_to,
+            title,
+            DOWN,
+            {'buff': MED_SMALL_BUFF},
+            g.to_edge,
+            RIGHT,
             FadeInFromDown(t4),
         )
         self.wait(duration=2)
@@ -328,13 +378,17 @@ class FACStack(Scene):
         t1.next_to(title, DOWN, buff=LARGE_BUFF).to_edge(LEFT)
         frame_width = 3.0
         args_ref = TextMobject('[ ]').scale(0.5)
-        main_frame = StackFrame(main_code, 'main()', 3, [('args', args_ref)], width=frame_width)
+        main_frame = StackFrame(main_code,
+                                'main()',
+                                3, [('args', args_ref)],
+                                width=frame_width)
         main_frame.next_to(g, LEFT, buff=LARGE_BUFF).to_edge(DOWN)
         main_code.move_highlight_rect(3)
         self.play(
             FadeIn(t1),
             FadeInFromDown(main_frame),
-            main_code.highlight_lines, 3,
+            main_code.highlight_lines,
+            3,
             FadeOut(t3),
             FadeOut(t4),
         )
@@ -342,8 +396,10 @@ class FACStack(Scene):
 
         foo_frame = StackFrame(foo_code, 'foo()', 5, ['n'], width=frame_width)
         foo_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
-        b1 = BraceLabel(foo_frame, 'Calling foo()\\\\pushes a frame',
-                        brace_direction=LEFT, label_constructor=TextMobject)
+        b1 = BraceLabel(foo_frame,
+                        'Calling foo()\\\\pushes a frame',
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject)
         hr_caller, hr_callee = main_code.setup_for_call(foo_code, 1)
         self.play(
             main_code.highlight_caller,
@@ -355,13 +411,19 @@ class FACStack(Scene):
         foo_code.complete_callee(hr_callee, self)
         self.wait(duration=2)
 
-        self.play(foo_code.highlight_lines, 2, foo_frame.set_line, 6, FadeOut(b1))
+        self.play(foo_code.highlight_lines, 2, foo_frame.set_line, 6,
+                  FadeOut(b1))
         self.wait()
 
-        bar_frame = StackFrame(bar_code, 'bar(1, 2)', 10, ['x', 'y', 'a', 'b'], width=frame_width)
+        bar_frame = StackFrame(bar_code,
+                               'bar(1, 2)',
+                               10, ['x', 'y', 'a', 'b'],
+                               width=frame_width)
         bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
-        b1 = BraceLabel(bar_frame, 'Calling bar()\\\\pushes a frame',
-                        brace_direction=LEFT, label_constructor=TextMobject)
+        b1 = BraceLabel(bar_frame,
+                        'Calling bar()\\\\pushes a frame',
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject)
         hr_caller, hr_callee = foo_code.setup_for_call(bar_code, (1, 2))
         self.play(
             foo_code.highlight_caller,
@@ -373,8 +435,12 @@ class FACStack(Scene):
         self.wait()
 
         self.play(
-            bar_frame.update_slot, 'x', 1,
-            bar_frame.update_slot, 'y', 2,
+            bar_frame.update_slot,
+            'x',
+            1,
+            bar_frame.update_slot,
+            'y',
+            2,
             FadeOut(b1),
         )
         self.play(bar_code.highlight_lines, 3, bar_frame.set_line, 11)
@@ -386,8 +452,10 @@ class FACStack(Scene):
 
         self.play(bar_frame.update_slot, 'b', 6)
         self.play(bar_code.highlight_lines, 5, bar_frame.set_line, 13)
-        b1 = BraceLabel(bar_frame, "Returning pops\\\\bar's frame",
-                        brace_direction=LEFT, label_constructor=TextMobject)
+        b1 = BraceLabel(bar_frame,
+                        "Returning pops\\\\bar's frame",
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject)
         self.play(FadeIn(b1))
         self.wait(duration=2)
 
@@ -402,12 +470,18 @@ class FACStack(Scene):
         self.wait()
 
         self.play(
-            foo_code.highlight_lines, 3,
-            foo_frame.set_line, 7,
-            foo_frame.update_slot, 'n', 6,
+            foo_code.highlight_lines,
+            3,
+            foo_frame.set_line,
+            7,
+            foo_frame.update_slot,
+            'n',
+            6,
         )
-        b1 = BraceLabel(foo_frame, "Returning pops\\\\foo's frame",
-                        brace_direction=LEFT, label_constructor=TextMobject)
+        b1 = BraceLabel(foo_frame,
+                        "Returning pops\\\\foo's frame",
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject)
         self.play(FadeIn(b1))
         self.wait()
 
@@ -422,12 +496,15 @@ class FACStack(Scene):
         self.wait()
 
         self.play(
-            main_code.highlight_lines, 4,
-            main_frame.set_line, 4,
+            main_code.highlight_lines,
+            4,
+            main_frame.set_line,
+            4,
         )
         self.wait()
 
-        t1 = TextMobject('And when main() returns\\\\the program ends').to_edge(LEFT)
+        t1 = TextMobject(
+            'And when main() returns\\\\the program ends').to_edge(LEFT)
         self.play(FadeIn(t1))
         self.wait()
 
@@ -457,14 +534,16 @@ class FACHarderOne(Scene):
         self.wait()
 
         code_scale = 0.75
-        main_code = CodeBlock('Java', r"""
+        main_code = CodeBlock(
+            'Java', r"""
             public static
             void main(String[] args) {
                 System.out.println(foo(1));
             }
             """).scale(code_scale)
         # Start line: 5
-        foo_code = CodeBlock('Java', r"""
+        foo_code = CodeBlock(
+            'Java', r"""
             foo(int a) {
                 int b = bar(a, 2);
                 int c = bar(a, b);
@@ -472,7 +551,8 @@ class FACHarderOne(Scene):
             }
             """).scale(code_scale)
         # Start line: 10
-        bar_code = CodeBlock('Java', r"""
+        bar_code = CodeBlock(
+            'Java', r"""
             int bar(int x, int y) {
                 int a = x + y;
                 int b = a * 2;
@@ -491,16 +571,23 @@ class FACHarderOne(Scene):
 
         frame_width = 3.0
         args_ref = TextMobject('[ ]').scale(0.5)
-        main_frame = StackFrame(main_code, 'main()', 3, [('args', args_ref)], width=frame_width)
+        main_frame = StackFrame(main_code,
+                                'main()',
+                                3, [('args', args_ref)],
+                                width=frame_width)
         main_frame.next_to(cg, LEFT, buff=LARGE_BUFF * 2).to_edge(DOWN)
         main_code.move_highlight_rect(3)
         self.play(
             FadeInFromDown(main_frame),
-            main_code.highlight_lines, 3,
+            main_code.highlight_lines,
+            3,
         )
         self.wait()
 
-        foo_frame = StackFrame(foo_code, 'foo(1)', 5, ['a', 'b', 'c'], width=frame_width)
+        foo_frame = StackFrame(foo_code,
+                               'foo(1)',
+                               5, ['a', 'b', 'c'],
+                               width=frame_width)
         foo_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
         hr_caller, hr_callee = main_code.setup_for_call(foo_code, 1)
         self.play(
@@ -512,12 +599,20 @@ class FACHarderOne(Scene):
         self.wait()
 
         self.play(
-            foo_code.highlight_lines, 2, foo_frame.set_line, 6,
-            foo_frame.update_slot, 'a', 1,
+            foo_code.highlight_lines,
+            2,
+            foo_frame.set_line,
+            6,
+            foo_frame.update_slot,
+            'a',
+            1,
         )
         self.wait()
 
-        bar_frame = StackFrame(bar_code, 'bar(1, 2)', 10, ['x', 'y', 'a', 'b'], width=frame_width)
+        bar_frame = StackFrame(bar_code,
+                               'bar(1, 2)',
+                               10, ['x', 'y', 'a', 'b'],
+                               width=frame_width)
         bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
         hr_caller, hr_callee = foo_code.setup_for_call(bar_code, 1)
         self.play(
@@ -529,21 +624,38 @@ class FACHarderOne(Scene):
         self.wait()
 
         self.play(
-            bar_code.highlight_lines, 2, bar_frame.set_line, 11,
-            bar_frame.update_slot, 'x', 1,
-            bar_frame.update_slot, 'y', 2,
+            bar_code.highlight_lines,
+            2,
+            bar_frame.set_line,
+            11,
+            bar_frame.update_slot,
+            'x',
+            1,
+            bar_frame.update_slot,
+            'y',
+            2,
         )
         self.wait()
 
         self.play(
-            bar_code.highlight_lines, 3, bar_frame.set_line, 12,
-            bar_frame.update_slot, 'a', 3,
+            bar_code.highlight_lines,
+            3,
+            bar_frame.set_line,
+            12,
+            bar_frame.update_slot,
+            'a',
+            3,
         )
         self.wait()
 
         self.play(
-            bar_code.highlight_lines, 4, bar_frame.set_line, 13,
-            bar_frame.update_slot, 'b', 6,
+            bar_code.highlight_lines,
+            4,
+            bar_frame.set_line,
+            13,
+            bar_frame.update_slot,
+            'b',
+            6,
         )
         self.wait()
 
@@ -557,12 +669,20 @@ class FACHarderOne(Scene):
         self.wait()
 
         self.play(
-            foo_code.highlight_lines, 3, foo_frame.set_line, 7,
-            foo_frame.update_slot, 'b', 6,
+            foo_code.highlight_lines,
+            3,
+            foo_frame.set_line,
+            7,
+            foo_frame.update_slot,
+            'b',
+            6,
         )
         self.wait()
 
-        bar_frame = StackFrame(bar_code, 'bar(1, 6)', 10, ['x', 'y', 'a', 'b'], width=frame_width)
+        bar_frame = StackFrame(bar_code,
+                               'bar(1, 6)',
+                               10, ['x', 'y', 'a', 'b'],
+                               width=frame_width)
         bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
         hr_caller, hr_callee = foo_code.setup_for_call(bar_code, 1)
         self.play(
@@ -574,21 +694,38 @@ class FACHarderOne(Scene):
         self.wait()
 
         self.play(
-            bar_code.highlight_lines, 2, bar_frame.set_line, 11,
-            bar_frame.update_slot, 'x', 1,
-            bar_frame.update_slot, 'y', 6,
+            bar_code.highlight_lines,
+            2,
+            bar_frame.set_line,
+            11,
+            bar_frame.update_slot,
+            'x',
+            1,
+            bar_frame.update_slot,
+            'y',
+            6,
         )
         self.wait()
 
         self.play(
-            bar_code.highlight_lines, 3, bar_frame.set_line, 12,
-            bar_frame.update_slot, 'a', 7,
+            bar_code.highlight_lines,
+            3,
+            bar_frame.set_line,
+            12,
+            bar_frame.update_slot,
+            'a',
+            7,
         )
         self.wait()
 
         self.play(
-            bar_code.highlight_lines, 4, bar_frame.set_line, 13,
-            bar_frame.update_slot, 'b', 14,
+            bar_code.highlight_lines,
+            4,
+            bar_frame.set_line,
+            13,
+            bar_frame.update_slot,
+            'b',
+            14,
         )
         self.wait()
 
@@ -602,8 +739,13 @@ class FACHarderOne(Scene):
         self.wait()
 
         self.play(
-            foo_code.highlight_lines, 4, foo_frame.set_line, 8,
-            foo_frame.update_slot, 'c', 14,
+            foo_code.highlight_lines,
+            4,
+            foo_frame.set_line,
+            8,
+            foo_frame.update_slot,
+            'c',
+            14,
         )
         self.wait()
 
@@ -618,7 +760,9 @@ class FACHarderOne(Scene):
 
         def fake_frame(name):
             frame_name = TextMobject(name).scale(0.75)
-            br = BackgroundRectangle(frame_name, buff=SMALL_BUFF, fill_opacity=0.15)
+            br = BackgroundRectangle(frame_name,
+                                     buff=SMALL_BUFF,
+                                     fill_opacity=0.15)
             br.set_fill(color=[ORANGE, BLUE])
             return VGroup(frame_name, br)
 
@@ -641,7 +785,10 @@ class FACHarderOne(Scene):
         # self.wait()
 
         self.play(
-            main_code.highlight_lines, 4, main_frame.set_line, 4,
+            main_code.highlight_lines,
+            4,
+            main_frame.set_line,
+            4,
         )
 
         hr_returner, hr_returnee = main_code.setup_for_return(main_code)
@@ -665,31 +812,52 @@ class FACClosing(Scene):
         frame_width = 3.0
         dummy_code = CodeBlock('Java', 'foo')
         args_ref = TextMobject('[ ]').scale(0.5)
-        main_frame = StackFrame(dummy_code, 'main()', 3, [('args', args_ref)], width=frame_width)
-        foo_frame = StackFrame(dummy_code, 'foo()', 6, [('n', 6)], width=frame_width)
-        bar_frame = StackFrame(dummy_code, 'bar(1, 2)', 13,
-                               [('x', 1), ('y', 2), ('a', 3), ('b', 6)], width=frame_width)
+        main_frame = StackFrame(dummy_code,
+                                'main()',
+                                3, [('args', args_ref)],
+                                width=frame_width)
+        foo_frame = StackFrame(dummy_code,
+                               'foo()',
+                               6, [('n', 6)],
+                               width=frame_width)
+        bar_frame = StackFrame(dummy_code,
+                               'bar(1, 2)',
+                               13, [('x', 1), ('y', 2), ('a', 3), ('b', 6)],
+                               width=frame_width)
         main_frame.to_edge(DOWN)
         foo_frame.next_to(main_frame, UP)
         bar_frame.next_to(foo_frame, UP)
         self.play(
-            LaggedStartMap(FadeInFrom, VGroup(main_frame, foo_frame, bar_frame),
-                           direction=UP, lag_ratio=0.5)
-        )
+            LaggedStartMap(FadeInFrom,
+                           VGroup(main_frame, foo_frame, bar_frame),
+                           direction=UP,
+                           lag_ratio=0.5))
         self.wait()
 
         text_scale = 0.75
-        b1 = BraceLabel(main_frame, 'Always starts\\\\with main()',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        b1 = BraceLabel(main_frame,
+                        'Always starts\\\\with main()',
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject,
+                        label_scale=text_scale)
         # b2 = BraceLabel(foo_frame, ['Calls push frames,\\\\', 'returns pop'],
         #                 brace_direction=RIGHT, label_constructor=TextMobject,
         #                 alignment='')
-        b3 = BraceLabel(bar_frame.slots()[0:2], 'Parameters',
-                        brace_direction=RIGHT, label_constructor=TextMobject, label_scale=text_scale)
-        b4 = BraceLabel(bar_frame.slots()[2:4], 'Locals',
-                        brace_direction=RIGHT, label_constructor=TextMobject, label_scale=text_scale)
-        b5 = BraceLabel(bar_frame.slots()[0:4], 'Storage for all\\\\variables in a function',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        b3 = BraceLabel(bar_frame.slots()[0:2],
+                        'Parameters',
+                        brace_direction=RIGHT,
+                        label_constructor=TextMobject,
+                        label_scale=text_scale)
+        b4 = BraceLabel(bar_frame.slots()[2:4],
+                        'Locals',
+                        brace_direction=RIGHT,
+                        label_constructor=TextMobject,
+                        label_scale=text_scale)
+        b5 = BraceLabel(bar_frame.slots()[0:4],
+                        'Storage for all\\\\variables in a function',
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject,
+                        label_scale=text_scale)
 
         push_up = TextMobject('Calls push frames').scale(text_scale)
         pua = Arrow(push_up.get_bottom(), push_up.get_top()).scale(2)
@@ -705,28 +873,36 @@ class FACClosing(Scene):
         pdg.to_edge(RIGHT).shift(DOWN)
 
         notes = VGroup(b1, pug, pdg, b5, b3, b4)
-        self.play(LaggedStartMap(ShowCreation, notes, lag_ratio=0.7), run_time=3)
+        self.play(LaggedStartMap(ShowCreation, notes, lag_ratio=0.7),
+                  run_time=3)
         self.wait(duration=5)
 
 
 class Misc(Scene):
     def construct(self):
         colors = color_gradient([BLUE, ORANGE], 8)
-        little_boxes = VGroup(*[Rectangle(height=0.25, width=0.75, fill_opacity=1, color=colors[i])
-                                for i in range(8)])
+        little_boxes = VGroup(*[
+            Rectangle(height=0.25, width=0.75, fill_opacity=1, color=colors[i])
+            for i in range(8)
+        ])
         little_boxes.arrange(UP, buff=0.1)
         little_boxes.center()
 
         self.play(
-            LaggedStartMap(FadeInFrom, little_boxes, lambda m: (m, UP + LEFT*8),
-                           lag_ratio=1.0, run_time=4.0, path_arc=-np.pi/4),
-        )
+            LaggedStartMap(FadeInFrom,
+                           little_boxes,
+                           lambda m: (m, UP + LEFT * 8),
+                           lag_ratio=1.0,
+                           run_time=4.0,
+                           path_arc=-np.pi / 4), )
 
         self.play(
-            LaggedStartMap(FadeOutAndShift, VGroup(*reversed(little_boxes)),
-                           lambda m: (m, UP + RIGHT*8),
-                           lag_ratio=1.0, run_time=4.0, path_arc=-np.pi/8),
-        )
+            LaggedStartMap(FadeOutAndShift,
+                           VGroup(*reversed(little_boxes)),
+                           lambda m: (m, UP + RIGHT * 8),
+                           lag_ratio=1.0,
+                           run_time=4.0,
+                           path_arc=-np.pi / 8), )
 
 
 class CallStackReview(Scene):
@@ -734,19 +910,22 @@ class CallStackReview(Scene):
         title = TextMobject('Quick Review: The Call Stack').to_edge(UP)
 
         code_scale = 0.75
-        main_code = CodeBlock('Java', r"""
+        main_code = CodeBlock(
+            'Java', r"""
             public static
             void main(String[] args) {
                 int n = foo(2);
             }
             """).scale(code_scale)
-        foo_code = CodeBlock('Java', r"""
+        foo_code = CodeBlock(
+            'Java', r"""
             static int foo(int x) {
                 int n = bar(x + 1, x * 2);
                 return n;
             }
             """).scale(code_scale)
-        bar_code = CodeBlock('Java', r"""
+        bar_code = CodeBlock(
+            'Java', r"""
             static int bar(int x,
                            int y) {
                 int a = x + y;
@@ -764,23 +943,36 @@ class CallStackReview(Scene):
 
         frame_width = 3.0
         args_ref = TextMobject('[ ]').scale(0.5)
-        main_frame = StackFrame(main_code, 'main()', 3, [('args', args_ref), 'n'], width=frame_width)
+        main_frame = StackFrame(main_code,
+                                'main()',
+                                3, [('args', args_ref), 'n'],
+                                width=frame_width)
         main_frame.next_to(fbg, LEFT, buff=LARGE_BUFF).to_edge(DOWN)
         main_code.move_highlight_rect(3)
         text_scale = 0.75
-        b1 = BraceLabel(main_frame, 'The call stack\\\\starts with main()',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        b1 = BraceLabel(main_frame,
+                        'The call stack\\\\starts with main()',
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject,
+                        label_scale=text_scale)
         self.play(
             FadeInFrom(main_frame, UP),
-            main_code.highlight_lines, 3,
+            main_code.highlight_lines,
+            3,
             FadeInFrom(b1, UP),
         )
         self.wait()
 
-        foo_frame = StackFrame(foo_code, 'foo(2)', 5, ['x', 'n'], width=frame_width)
+        foo_frame = StackFrame(foo_code,
+                               'foo(2)',
+                               5, ['x', 'n'],
+                               width=frame_width)
         foo_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
-        b2 = BraceLabel(foo_frame, 'Calls push frames',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        b2 = BraceLabel(foo_frame,
+                        'Calls push frames',
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject,
+                        label_scale=text_scale)
         hr_caller, hr_callee = main_code.setup_for_call(foo_code, 1)
         self.play(
             main_code.highlight_caller,
@@ -792,16 +984,27 @@ class CallStackReview(Scene):
         self.wait()
 
         self.play(
-            foo_code.highlight_lines, 2, foo_frame.set_line, 6,
-            foo_frame.update_slot, 'x', 2,
+            foo_code.highlight_lines,
+            2,
+            foo_frame.set_line,
+            6,
+            foo_frame.update_slot,
+            'x',
+            2,
         )
         self.wait()
 
-        bar_frame = StackFrame(bar_code, 'bar(3, 4)', 10, ['x', 'y', 'a'], width=frame_width)
+        bar_frame = StackFrame(bar_code,
+                               'bar(3, 4)',
+                               10, ['x', 'y', 'a'],
+                               width=frame_width)
         bar_frame.next_to(foo_frame, UP, buff=SMALL_BUFF)
-        b3 = BraceLabel(bar_frame, 'Holds arguments\\\\and locals',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
-        hr_caller, hr_callee = foo_code.setup_for_call(bar_code, (1,2))
+        b3 = BraceLabel(bar_frame,
+                        'Holds arguments\\\\and locals',
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject,
+                        label_scale=text_scale)
+        hr_caller, hr_callee = foo_code.setup_for_call(bar_code, (1, 2))
         self.play(
             foo_code.highlight_caller,
             ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
@@ -812,15 +1015,27 @@ class CallStackReview(Scene):
         self.wait()
 
         self.play(
-            bar_code.highlight_lines, 3, bar_frame.set_line, 11,
-            bar_frame.update_slot, 'x', 3,
-            bar_frame.update_slot, 'y', 4,
+            bar_code.highlight_lines,
+            3,
+            bar_frame.set_line,
+            11,
+            bar_frame.update_slot,
+            'x',
+            3,
+            bar_frame.update_slot,
+            'y',
+            4,
         )
         self.wait()
 
         self.play(
-            bar_code.highlight_lines, 4, bar_frame.set_line, 12,
-            bar_frame.update_slot, 'a', 7,
+            bar_code.highlight_lines,
+            4,
+            bar_frame.set_line,
+            12,
+            bar_frame.update_slot,
+            'a',
+            7,
         )
         self.wait(duration=3)
 
@@ -836,11 +1051,19 @@ class CallStackReview(Scene):
         foo_code.complete_returnee(hr_returnee, self)
         self.wait()
 
-        b4 = BraceLabel(foo_frame, 'Returns pop',
-                        brace_direction=LEFT, label_constructor=TextMobject, label_scale=text_scale)
+        b4 = BraceLabel(foo_frame,
+                        'Returns pop',
+                        brace_direction=LEFT,
+                        label_constructor=TextMobject,
+                        label_scale=text_scale)
         self.play(
-            foo_code.highlight_lines, 3, foo_frame.set_line, 7,
-            foo_frame.update_slot, 'n', 7,
+            foo_code.highlight_lines,
+            3,
+            foo_frame.set_line,
+            7,
+            foo_frame.update_slot,
+            'n',
+            7,
             ShowCreation(b4),
         )
         self.wait()
@@ -856,8 +1079,13 @@ class CallStackReview(Scene):
         self.wait()
 
         self.play(
-            main_code.highlight_lines, 4, main_frame.set_line, 4,
-            main_frame.update_slot, 'n', 7,
+            main_code.highlight_lines,
+            4,
+            main_frame.set_line,
+            4,
+            main_frame.update_slot,
+            'n',
+            7,
         )
         self.wait()
 
@@ -873,9 +1101,9 @@ class CallStackReview(Scene):
         t1 = TextMobject('Take a moment to think about\\\\'
                          'where args and locals live,\\\\'
                          'and  what the call stack looks like.').to_edge(LEFT)
-        t2 = TextMobject('\\textit{It will help later!!}').next_to(t1, DOWN, buff=LARGE_BUFF)
+        t2 = TextMobject('\\textit{It will help later!!}').next_to(
+            t1, DOWN, buff=LARGE_BUFF)
         self.play(FadeIn(t1))
         self.wait()
         self.play(ShowCreation(t2))
         self.wait(duration=2)
-
