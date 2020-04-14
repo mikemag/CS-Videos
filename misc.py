@@ -63,7 +63,7 @@ class CodeTextStringDemo(Scene):
 
             last_h = None
             for line_no in range(1, len(c) + 1):
-                h = c.get_line_highlight_rect(line_no)
+                h = c.get_lines_highlight_rect(line_no)
                 if last_h:
                     self.play(FadeOut(last_h), FadeIn(h))
                 else:
@@ -71,16 +71,16 @@ class CodeTextStringDemo(Scene):
                 last_h = h
             self.play(FadeOut(last_h))
 
-            r = c.get_line_highlight_rect((1, 3))
+            r = c.get_lines_highlight_rect((1, 4))
             self.play(FadeIn(r))
             self.play(FadeOut(r))
 
-            l2 = SurroundingRectangle(c.get_line(2))
-            self.play(Indicate(c.get_line(3)))
-            self.play(Indicate(c.get_line(3)[1:3]))
+            l2 = SurroundingRectangle(c.get_lines(2))
+            self.play(Indicate(c.get_lines(3)))
+            self.play(Indicate(c.get_lines(3)[1:3]))
             self.play(FadeIn(l2))
             g.add(l2)
-            l3 = SurroundingRectangle(c.get_line(3))
+            l3 = SurroundingRectangle(c.get_lines(3))
             self.play(ReplacementTransform(l2, l3))
             g.add(l3)
 
@@ -93,84 +93,177 @@ class CodeTextStringDemo(Scene):
 class CodeBlockDemo(Scene):
 
     def construct(self):
-        c1 = CodeBlock(
-            'Java', r"""
+        code_scale = 0.75
+        foo_code = CodeBlock(
+            'Java',
+            r"""
             int foo() {
-                int n = bar(1, 2);
+                int n = bar(2, 1);
+                n += bar(2, 2);
                 return n;
             }
-            """)
-        c2 = CodeBlock(
-            'Java', r"""
+            """,
+            add_labels=True,
+            code_scale=code_scale,
+        )
+        bar_code = CodeBlock(
+            'Java',
+            r"""
             int bar(int x, int y) {
-                int a = x + y;
-                int b = a * 2;
+                if (x == 1) {
+                    return y;
+                }
+                int b = bar(x - 1, y + 1);
                 return b;
             }
-            """)
-        c1.to_edge(UP)
-        c2.next_to(c1, DOWN, buff=LARGE_BUFF)
-        self.play(FadeIn(c1), FadeIn(c2))
-        # self.wait()
-
-        self.play(c1.highlight_lines, 1)
-        self.play(c1.highlight_lines, 2)
-        self.play(c1.highlight_lines, (2, 3))
-        self.play(c1.highlight_lines, 3)
-        self.play(c1.fade_out_highlight)
-        c1.move_highlight_rect(2)
-        self.play(c1.highlight_lines, 2)
-        self.wait()
-
-        hr_caller, hr_callee = c1.setup_for_call(c2, 1)
-        self.play(
-            c1.highlight_caller,
-            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
+            """,
+            line_offset=5,
+            add_labels=True,
+            code_scale=code_scale,
         )
-        c2.complete_callee(hr_callee, self)
+
+        title = TextMobject('CodeBlock Basics Demo')
+        title.to_edge(UP)
+        foo_code.next_to(title, DOWN)
+        foo_code.fade_labels()
+        bar_code.next_to(foo_code.get_code(),
+                         DOWN,
+                         buff=MED_LARGE_BUFF,
+                         aligned_edge=LEFT,
+                         submobject_to_align=bar_code.get_code())
+        self.play(*[FadeIn(o) for o in [title, foo_code, bar_code]])
+        self.wait(0.5)
+
+        self.play(foo_code.highlight_lines, 1, bar_code.highlight_lines, (6, 8))
+        self.wait(0.5)
+        self.play(foo_code.highlight_lines, 2, bar_code.highlight_lines,
+                  (8, 10))
+        self.play(foo_code.highlight_lines, 3, bar_code.highlight_lines,
+                  (10, 12))
+        self.wait(0.5)
+        self.play(Indicate(foo_code))
+        self.wait(0.5)
+        self.play(Indicate(bar_code))
+        self.wait(0.5)
+        self.play(foo_code.remove_highlight, bar_code.remove_highlight)
+        self.wait(0.5)
+        self.play(FadeOut(foo_code))
+        self.wait(0.5)
+        self.play(FadeIn(foo_code))
+        self.wait(0.5)
+        self.play(foo_code.show_labels, bar_code.fade_labels)
+        self.wait(0.5)
+        self.play(foo_code.fade_labels, bar_code.show_labels)
+        self.wait(0.5)
+
+        foo_code.move_hidden_highlight(2)
+        bar_code.move_hidden_highlight((8, 10))
+        self.wait(0.5)
+        self.play(foo_code.highlight_lines, 2, bar_code.highlight_lines,
+                  (8, 10))
+        self.wait(0.5)
+        self.play(foo_code.highlight_lines, 4, bar_code.highlight_lines, (6, 9))
+        self.wait(0.5)
+        self.play(foo_code.remove_highlight, bar_code.remove_highlight)
+        self.wait(0.5)
+
+        self.play(FadeOut(foo_code), FadeOut(bar_code))
         self.wait()
 
-        self.play(c2.highlight_lines, 2)
-        self.play(c2.highlight_lines, 3)
-        self.play(c2.highlight_lines, 4)
-        self.wait()
 
-        hr_returner, hr_returnee = c2.setup_for_return(c1)
-        self.play(
-            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
-            c1.highlight_returnee,
+class CodeBlockSteppingDemo(Scene):
+
+    def construct(self):
+        code_scale = 0.75
+        foo_code = CodeBlock(
+            'Java',
+            r"""
+            int foo() {
+                int n = bar(2, 1);
+                n += bar(2, 2);
+                return n;
+            }
+            """,
+            code_scale=code_scale,
         )
-        c1.complete_returnee(hr_returnee, self)
-
-        self.play(c1.highlight_lines, 3)
-
-        # Again...
-        hr_caller, hr_callee = c1.setup_for_call(c2, 1)
-        self.play(
-            c1.highlight_caller,
-            ReplacementTransform(hr_caller, hr_callee, path_arc=np.pi),
+        bar_code = CodeBlock(
+            'Java',
+            r"""
+            int bar(int x, int y) {
+                if (x == 1) {
+                    return y;
+                }
+                int b = bar(x - 1, y + 1);
+                return b;
+            }
+            """,
+            line_offset=5,
+            code_scale=code_scale,
         )
-        c2.complete_callee(hr_callee, self)
+        main_code = CodeBlock('Java', 'off_screen')
+        main_code.shift(UP * 8)  # Offscreen up
+        self.add(main_code)
+
+        title = TextMobject('CodeBlock Stepping Demo')
+        title.to_edge(UP)
+        foo_code.next_to(title, DOWN)
+        bar_code.next_to(foo_code.get_code(),
+                         DOWN,
+                         buff=MED_LARGE_BUFF,
+                         aligned_edge=LEFT,
+                         submobject_to_align=bar_code.get_code())
+        self.play(*[FadeIn(o) for o in [title, foo_code, bar_code]])
         self.wait()
 
-        self.play(c2.highlight_lines, 2)
-        self.play(c2.highlight_lines, 3)
-        self.play(c2.highlight_lines, 4)
+        # Step through both code blocks until done.
+        xi = main_code.pre_call(foo_code, 1)
+        self.play(*main_code.get_control_transfer_counterclockwise(xi))
+        foo_code.post_control_transfer(xi, self)
+
+        foo_code.prep_annotations(2, 3)
+        foo_code.generate_target().highlight_lines(2).set_annotation(2, 'n: ?')
+        self.play(MoveToTarget(foo_code))
+        n = self.run_bar(bar_code, foo_code, 2, 2, 1)
+        self.play(foo_code.highlight_lines, 3, foo_code.set_annotation, 2, None,
+                  foo_code.set_annotation, 3, 'n: %d' % n, bar_code.fade_labels)
+        n += self.run_bar(bar_code, foo_code, 3, 2, 2)
+        self.play(foo_code.highlight_lines, 4, foo_code.set_annotation, 3,
+                  'n: %d' % n)
+
+        xi = foo_code.pre_return(main_code, 1)
+        self.play(*bar_code.get_control_transfer_clockwise(xi))
+        main_code.post_control_transfer(xi, self)
+
+        self.play(FadeOut(title), FadeOut(foo_code), FadeOut(bar_code))
         self.wait()
 
-        hr_returner, hr_returnee = c2.setup_for_return(c1)
-        self.play(
-            ReplacementTransform(hr_returner, hr_returnee, path_arc=-np.pi),
-            c1.highlight_returnee,
-        )
-        c1.complete_returnee(hr_returnee, self)
+    def run_bar(self, bar_code, caller_code, caller_line, x, y):
+        self.wait(0.5)
+        xi = caller_code.pre_call(bar_code, 6)
+        self.play(*caller_code.get_control_transfer_counterclockwise(xi))
+        bar_code.post_control_transfer(xi, self)
+        self.wait(0.5)
 
-        self.play(c1.highlight_lines, 4)
+        self.play(bar_code.highlight_lines, 7)
+        if x == 1:
+            self.play(bar_code.highlight_lines, 8)
+            self.wait(0.5)
+            xi = bar_code.pre_return(caller_code, caller_line)
+            self.play(*bar_code.get_control_transfer_clockwise(xi))
+            caller_code.post_control_transfer(xi, self)
+            self.wait(0.5)
+            return y
 
-        self.wait()
+        self.play(bar_code.highlight_lines, 10)
+        b = self.run_bar(bar_code, bar_code, 10, x - 1, y + 1)
 
-        self.play(FadeOut(c1), FadeOut(c2))
-        self.wait()
+        self.play(bar_code.highlight_lines, 11)
+        self.wait(0.5)
+        xi = bar_code.pre_return(caller_code, caller_line)
+        self.play(*bar_code.get_control_transfer_clockwise(xi))
+        caller_code.post_control_transfer(xi, self)
+        self.wait(0.5)
+        return b
 
 
 class StackFrameDemo(Scene):
