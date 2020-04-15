@@ -74,7 +74,8 @@ class RecursiveCalls(Scene):
     def construct(self):
         code_scale = 0.75
         ss_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static double StrangeSqrt(double a) { 
                 if (a < 0) { 
                     double b = StrangeSqrt(a * -1);
@@ -82,7 +83,9 @@ class RecursiveCalls(Scene):
                 } 
                 return Math.sqrt(a);
             }
-            """).scale(code_scale)
+            """,
+            code_scale=code_scale,
+        )
 
         t1 = TextMobject('Consider this somewhat strange square root function:')
         t1.next_to(ss_code, UP, buff=LARGE_BUFF)
@@ -97,7 +100,7 @@ class RecursiveCalls(Scene):
         t2.next_to(ss_code, DOWN, buff=LARGE_BUFF)
         # 012345 6 7 8901234567890 1 2345
         # double b = StrangeSqrt(a * -1);
-        rl = ss_code.code_string().get_line(3)
+        rl = ss_code.get_code().get_lines(3)
         rc_highlight = SurroundingRectangle(rl[8:-1])
         self.play(
             FadeIn(t2),
@@ -111,17 +114,21 @@ class RecursiveCalls(Scene):
 
         # Run with a positive input
         main_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static void main(String[] args) {
                 double n = StrangeSqrt(4);
             }
-            """).scale(code_scale - 0.1)
+            """,
+            line_offset=7,
+            code_scale=code_scale - 0.1,
+        )
         frame_width = 3.5
         main_frame = StackFrame(main_code,
                                 'main()',
                                 9, ['n'],
                                 width=frame_width)
-        main_code.highlight_lines(2)
+        main_code.highlight_lines(9)
         VGroup(main_code, main_frame).arrange(RIGHT,
                                               buff=LARGE_BUFF).to_edge(DOWN)
         t3 = TextMobject("Let's see what it does with a positive input...")\
@@ -146,14 +153,14 @@ class RecursiveCalls(Scene):
                               1, ['a', 'b'],
                               width=frame_width)
         ss_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
-        hr_caller, hr_callee = main_code.setup_for_call(ss_code, 1)
+
+        xi = main_code.pre_call(ss_code, 1)
         self.play(
-            main_code.highlight_caller,
-            ReplacementTransform(hr_caller, hr_callee, path_arc=-np.pi),
+            *main_code.get_control_transfer_counterclockwise(xi),
             FadeInFrom(ss_frame, UP),
             FadeOut(t3),
         )
-        ss_code.complete_callee(hr_callee, self)
+        ss_code.post_control_transfer(xi, self)
         self.wait()
 
         self.play(
@@ -175,13 +182,12 @@ class RecursiveCalls(Scene):
         )
         self.wait()
 
-        hr_returner, hr_returnee = ss_code.setup_for_return(main_code)
+        xi = ss_code.pre_return(main_code, 9)
         self.play(
-            ReplacementTransform(hr_returner, hr_returnee, path_arc=np.pi),
-            main_code.highlight_returnee,
+            *ss_code.get_control_transfer_clockwise(xi),
             Uncreate(ss_frame),
         )
-        main_code.complete_returnee(hr_returnee, self)
+        main_code.post_control_transfer(xi, self)
         self.wait()
 
         t1 = TextMobject('That seems pretty normal...').next_to(ss_code,
@@ -189,7 +195,7 @@ class RecursiveCalls(Scene):
                                                                 buff=LARGE_BUFF)
         self.play(
             main_code.highlight_lines,
-            3,
+            10,
             main_frame.set_line,
             10,
             main_frame.update_slot,
@@ -210,16 +216,20 @@ class RecursiveCalls(Scene):
 
         # Run with a negative input and see the recursion
         main_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static void main(String[] args) {
                 double n = StrangeSqrt(-4);
             }
-            """).scale(code_scale - 0.1)
+            """,
+            line_offset=7,
+            code_scale=code_scale - 0.1,
+        )
         main_frame = StackFrame(main_code,
                                 'main()',
                                 9, ['n'],
                                 width=frame_width)
-        main_code.highlight_lines(2)
+        main_code.highlight_lines(9)
         VGroup(main_code, main_frame).arrange(RIGHT,
                                               buff=LARGE_BUFF).to_edge(DOWN)
 
@@ -234,14 +244,13 @@ class RecursiveCalls(Scene):
                               1, ['a', 'b'],
                               width=frame_width)
         ss_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
-        hr_caller, hr_callee = main_code.setup_for_call(ss_code, 1)
+        xi = main_code.pre_call(ss_code, 1)
         self.play(
-            main_code.highlight_caller,
-            ReplacementTransform(hr_caller, hr_callee, path_arc=-np.pi),
+            *main_code.get_control_transfer_counterclockwise(xi),
             FadeInFrom(ss_frame, UP),
             FadeOut(t2),
         )
-        ss_code.complete_callee(hr_callee, self)
+        ss_code.post_control_transfer(xi, self)
         self.wait()
 
         self.play(
@@ -270,7 +279,9 @@ class RecursiveCalls(Scene):
                                1, ['a', 'b'],
                                width=frame_width)
         ss2_frame.next_to(ss_frame, UP, buff=SMALL_BUFF)
-        r1_call_site_rect = ss_code.highlight_rect().copy().set_color(WHITE)
+
+        r1_call_site_rect = ss_code.get_current_highlight().copy().set_color(
+            WHITE)
         self.play(
             FadeInFrom(ss2_frame, UP),
             ss_code.highlight_lines,
@@ -344,17 +355,16 @@ class RecursiveCalls(Scene):
         )
         self.wait()
 
-        hr_returner, hr_returnee = ss_code.setup_for_return(main_code)
+        xi = ss_code.pre_return(main_code, 9)
         self.play(
-            ReplacementTransform(hr_returner, hr_returnee, path_arc=np.pi),
-            main_code.highlight_returnee,
+            *ss_code.get_control_transfer_clockwise(xi),
             Uncreate(ss_frame),
         )
-        main_code.complete_returnee(hr_returnee, self)
+        main_code.post_control_transfer(xi, self)
         self.wait()
         self.play(
             main_code.highlight_lines,
-            3,
+            10,
             main_frame.set_line,
             10,
             main_frame.update_slot,
@@ -393,7 +403,8 @@ class BrokenRecursiveCalls(Scene):
         # - switch it out for the broken one, and highlight and note the change.
         code_scale = 0.75
         ss_good_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static double StrangeSqrt(double a) { 
                 if (a < 0) { 
                     double b = StrangeSqrt(a * -1);
@@ -401,7 +412,9 @@ class BrokenRecursiveCalls(Scene):
                 } 
                 return Math.sqrt(a);
             }
-            """).scale(code_scale)
+            """,
+            code_scale=code_scale,
+        )
         ss_good_code.to_edge(UP)
         self.add(ss_good_code)
 
@@ -412,13 +425,14 @@ class BrokenRecursiveCalls(Scene):
         self.play(FadeIn(t1))
         self.wait()
 
-        gl2 = ss_good_code.code_string().get_line(2)
+        gl2 = ss_good_code.get_code().get_lines(2)
         ghr = SurroundingRectangle(gl2[3:6])
         self.play(ShowCreation(ghr))
         self.wait()
 
         ss_bad_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static double StrangeSqrt(double a) { 
                 if (a <= 0) { 
                     double b = StrangeSqrt(a * -1);
@@ -426,9 +440,11 @@ class BrokenRecursiveCalls(Scene):
                 } 
                 return Math.sqrt(a);
             }
-            """).scale(code_scale)
+            """,
+            code_scale=code_scale,
+        )
         ss_bad_code.to_edge(UP)
-        bl2 = ss_bad_code.code_string().get_line(2)
+        bl2 = ss_bad_code.get_code().get_lines(2)
         bhr = SurroundingRectangle(bl2[3:7])
         self.play(
             ReplacementTransform(ss_good_code, ss_bad_code),
@@ -453,17 +469,21 @@ class BrokenRecursiveCalls(Scene):
 
         # - Start stepping through this and see the stack start to grow forever.
         main_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static void main(String[] args) {
                 double n = StrangeSqrt(0);
             }
-            """).scale(code_scale - 0.1)
+            """,
+            line_offset=7,
+            code_scale=code_scale - 0.1,
+        )
         frame_width = 3.5
         main_frame = StackFrame(main_code,
                                 'main()',
                                 9, ['n'],
                                 width=frame_width)
-        main_code.highlight_lines(2)
+        main_code.highlight_lines(9)
         VGroup(main_code, main_frame).arrange(RIGHT,
                                               buff=LARGE_BUFF).to_edge(DOWN)
         self.play(
@@ -477,32 +497,20 @@ class BrokenRecursiveCalls(Scene):
                               1, ['a', 'b'],
                               width=frame_width)
         ss_frame.next_to(main_frame, UP, buff=SMALL_BUFF)
-        hr_caller, hr_callee = main_code.setup_for_call(ss_bad_code, 1)
+
+        xi = main_code.pre_call(ss_bad_code, 1)
         self.play(
-            main_code.highlight_caller,
-            ReplacementTransform(hr_caller, hr_callee, path_arc=-np.pi),
+            *main_code.get_control_transfer_counterclockwise(xi),
             FadeInFrom(ss_frame, UP),
         )
-        ss_bad_code.complete_callee(hr_callee, self)
+        ss_bad_code.post_control_transfer(xi, self)
         self.wait()
 
-        self.play(
-            ss_bad_code.highlight_lines,
-            2,
-            ss_frame.set_line,
-            2,
-            ss_frame.update_slot,
-            'a',
-            0,
-        )
+        self.play(ss_bad_code.highlight_lines, 2, ss_frame.set_line, 2,
+                  ss_frame.update_slot, 'a', 0)
         self.wait()
 
-        self.play(
-            ss_bad_code.highlight_lines,
-            3,
-            ss_frame.set_line,
-            3,
-        )
+        self.play(ss_bad_code.highlight_lines, 3, ss_frame.set_line, 3)
         self.wait()
 
         def call_ss_again(stack_group, previous_frame, extras=None):
@@ -523,39 +531,33 @@ class BrokenRecursiveCalls(Scene):
                            1, ['a', 'b'],
                            width=frame_width)
             f.next_to(previous_frame, UP, buff=SMALL_BUFF)
-            self.play(
-                *extra_anims,
-                ss_bad_code.highlight_lines,
-                1,
-                f.set_line,
-                1,
-                FadeIn(f),
-                MaintainPositionRelativeTo(f, previous_frame),
-                run_time=runtime,
-            )
+            self.play(*extra_anims,
+                      ss_bad_code.highlight_lines,
+                      1,
+                      f.set_line,
+                      1,
+                      FadeIn(f),
+                      MaintainPositionRelativeTo(f, previous_frame),
+                      run_time=runtime)
             if wait_each_step:
                 self.wait()
 
-            self.play(
-                ss_bad_code.highlight_lines,
-                2,
-                f.set_line,
-                2,
-                f.update_slot,
-                'a',
-                0,
-                run_time=runtime,
-            )
+            self.play(ss_bad_code.highlight_lines,
+                      2,
+                      f.set_line,
+                      2,
+                      f.update_slot,
+                      'a',
+                      0,
+                      run_time=runtime)
             if wait_each_step:
                 self.wait()
 
-            self.play(
-                ss_bad_code.highlight_lines,
-                3,
-                f.set_line,
-                3,
-                run_time=runtime,
-            )
+            self.play(ss_bad_code.highlight_lines,
+                      3,
+                      f.set_line,
+                      3,
+                      run_time=runtime)
             if wait_each_step:
                 self.wait()
             stack_group.add(f)
@@ -583,13 +585,7 @@ class BrokenRecursiveCalls(Scene):
         sg.save_state()
         t3 = TextMobject("The stack is getting quite deep!").next_to(
             main_code, UP, buff=LARGE_BUFF)
-        self.play(
-            sg.scale,
-            0.20,
-            {'about_edge': TOP},
-            FadeOut(t2),
-            FadeIn(t3),
-        )
+        self.play(sg.scale, 0.20, {'about_edge': TOP}, FadeOut(t2), FadeIn(t3))
         self.wait(duration=2)
         self.play(sg.restore)
 
@@ -611,15 +607,12 @@ class BrokenRecursiveCalls(Scene):
         so_exception = TextMobject(
             '\\texttt{Exception in thread "main"\\\\java.lang.StackOverflowError}',
         ).set_color(YELLOW).scale(0.75).next_to(main_code, UP, buff=LARGE_BUFF)
-        self.play(
-            sg.shift,
-            DOWN * so_frame.get_height() + DOWN * SMALL_BUFF,
-            ss_bad_code.highlight_rect().set_color,
-            ORANGE,
-            FadeIn(so_frame),
-            MaintainPositionRelativeTo(so_frame, curr_ss_frame),
-            Write(so_exception),
-        )
+        self.play(sg.shift,
+                  DOWN * so_frame.get_height() + DOWN * SMALL_BUFF,
+                  ss_bad_code.get_current_highlight().set_color, ORANGE,
+                  FadeIn(so_frame),
+                  MaintainPositionRelativeTo(so_frame, curr_ss_frame),
+                  Write(so_exception))
         sg.add(so_frame)
         self.wait(duration=2)
 
@@ -728,7 +721,8 @@ class Power1(Scene):
 
         code_scale = 0.75
         power_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static int power(int x, int n) {
                 if (n == 0) {
                     return 1;
@@ -736,7 +730,9 @@ class Power1(Scene):
                 int t = power(x, n - 1);
                 return x * t;
             }
-            """).scale(code_scale)
+            """,
+            code_scale=code_scale,
+        )
         self.play(
             *[FadeOut(o) for o in [t3, t4, f1[:-1], f2[3]]],
             FadeInFromDown(power_code),
@@ -744,7 +740,7 @@ class Power1(Scene):
         self.wait()
 
         b1 = BraceLabel(
-            power_code.code_string().get_lines(2, 4),
+            power_code.get_code().get_lines((2, 4)),
             'Remember $x^0=1$, because math!',
             brace_direction=RIGHT,
             label_constructor=TextMobject,
@@ -759,19 +755,22 @@ class Power1(Scene):
         self.wait()
 
         # Start stepping through this and see it go.
-        main_code = CodeBlock('Java',
-                              r"""
+        main_code = CodeBlock(
+            'Java',
+            r"""
             public static void main(String[] args) {
                 int y = power(4, 3);
             }
             """,
-                              line_offset=7).scale(code_scale - 0.1)
+            line_offset=7,
+            code_scale=code_scale - 0.1,
+        )
         frame_width = 3.5
         main_frame = StackFrame(main_code,
                                 'main()',
-                                2, ['y'],
+                                9, ['y'],
                                 width=frame_width)
-        main_code.highlight_lines(2)
+        main_code.highlight_lines(9)
         VGroup(main_code, main_frame).arrange(RIGHT,
                                               buff=LARGE_BUFF).to_edge(DOWN)
         self.play(
@@ -791,15 +790,9 @@ class Power1(Scene):
                                      width=frame_width)
             call_stack.animate_call(stack_frame, self)
 
-            self.play(
-                *stack_frame.get_update_line_anims(2),
-                stack_frame.update_slot,
-                'x',
-                x,
-                stack_frame.update_slot,
-                'n',
-                n,
-            )
+            self.play(*stack_frame.get_update_line_anims(2),
+                      stack_frame.update_slot, 'x', x, stack_frame.update_slot,
+                      'n', n)
 
             if n == 0:
                 self.play(*stack_frame.get_update_line_anims(3))
@@ -823,18 +816,14 @@ class Power1(Scene):
                 return x * t
 
         result = call_power(4, 3, CallStack(main_frame))
-        self.play(
-            *main_frame.get_update_line_anims(3),
-            main_frame.update_slot,
-            'y',
-            result,
-        )
+        self.play(*main_frame.get_update_line_anims(10), main_frame.update_slot,
+                  'y', result)
         self.wait()
 
         final_eq = TexMobject('4^3=', '64')
         final_eq.next_to(power_code, DOWN, buff=LARGE_BUFF)
         lhs = final_eq[0].copy().move_to(
-            main_code.code_string().get_line(2)[12:15])
+            main_code.get_code().get_lines(2)[12:15])
         rhs = final_eq[1].copy().move_to(main_frame.slots()[0])
         self.play(
             ReplacementTransform(lhs, final_eq[0]),
@@ -853,7 +842,8 @@ class Anatomy(Scene):
         # Always has two parts: base case and recursive step.
         code_scale = 0.75
         power_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static int power(int x, int n) {
                 if (n == 0) {
                     return 1;
@@ -861,7 +851,9 @@ class Anatomy(Scene):
                 int t = power(x, n - 1);
                 return x * t;
             }
-            """).scale(code_scale)
+            """,
+            code_scale=code_scale,
+        )
         power_code.to_edge(UP)
         self.add(power_code)
         self.wait()
@@ -876,8 +868,8 @@ class Anatomy(Scene):
         self.wait()
 
         pc_groups = [
-            VGroup(power_code.code_string().get_lines(s, e))
-            for s, e in [(1, 1), (2, 4), (5, 6), (7, 7)]
+            VGroup(power_code.get_code().get_lines(p))
+            for p in [(1, 2), (2, 5), (5, 7), (7, 8)]
         ]
         pc_t = [g.generate_target() for g in pc_groups]
 
@@ -983,12 +975,12 @@ class Anatomy(Scene):
 
         power_code.generate_target()
         power_code.target.to_edge(RIGHT)
-        bcb = BraceLabel(power_code.target.code_string().get_lines(2, 4),
+        bcb = BraceLabel(power_code.target.get_code().get_lines((2, 5)),
                          '\\textit{Base Case}',
                          brace_direction=LEFT,
                          label_constructor=TextMobject,
                          buff=LARGE_BUFF)
-        rsb = BraceLabel(power_code.target.code_string().get_lines(5, 6),
+        rsb = BraceLabel(power_code.target.get_code().get_lines((5, 7)),
                          '\\textit{Recursive Step}',
                          brace_direction=LEFT,
                          label_constructor=TextMobject,

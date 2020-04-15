@@ -132,12 +132,12 @@ class CodeTextString(SingleStringTexMobject):
         Line numbers start at 1
         """
         if isinstance(lines, tuple):
-            return VGroup(self[lines[0] - 1:lines[1] - 1])
+            return self[lines[0] - 1:lines[1] - 1]
         else:
             return self[lines - 1]
 
     def get_lines_highlight_rect(self, lines, color=YELLOW, buff=SMALL_BUFF):
-        code_lines = self.get_lines(lines)
+        code_lines = VGroup(self.get_lines(lines))
         left_x = self.get_left()[0]
         right_x = code_lines.get_right()[0]
 
