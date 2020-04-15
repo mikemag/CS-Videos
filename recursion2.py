@@ -5,6 +5,7 @@ from cs_education.csanim.stacks import StackFrame, CallStack
 
 
 class Intro(Scene):
+
     def construct(self):
         title = TextMobject('Recursion: Part 2').scale(1.5).to_edge(UP)
         self.play(ShowCreation(title))
@@ -18,12 +19,11 @@ class Intro(Scene):
 
 
 class RevisitPower1(Scene):
+
     def construct(self):
         t1 = TextMobject(
-            "Let's look at our \\texttt{power(x,n)} function from Part 1 again"
-        )
+            "Let's look at our \\texttt{power(x,n)} function from Part 1 again")
         t1.to_edge(UP)
-        code_scale = 0.75
         power1_code = CodeBlock(
             'Java', r"""
             public static int power(int x, int n) {
@@ -33,7 +33,7 @@ class RevisitPower1(Scene):
                 int t = power(x, n - 1);
                 return x * t;
             }
-            """).scale(code_scale)
+            """)
         power1_code.next_to(t1, DOWN, buff=MED_LARGE_BUFF)
         self.play(
             FadeIn(t1),
@@ -57,7 +57,7 @@ class RevisitPower1(Scene):
                         brace_direction=DOWN,
                         label_constructor=TextMobject)
         f1 = VGroup(f1, b1)
-        hr = SurroundingRectangle(power1_code.code_string().get_line(5)[-5:-2])
+        hr = SurroundingRectangle(power1_code.get_code().get_lines(5)[-5:-2])
         self.play(ReplacementTransform(t2, t3), FadeInFromDown(f1), FadeIn(hr))
         self.wait(duration=4)
 
@@ -69,6 +69,7 @@ class RevisitPower1(Scene):
 
 
 class Equations(Scene):
+
     def construct(self):
         t1 = TextMobject("Let's go back to our original equation").shift(UP)
         self.play(FadeInFromDown(t1))
@@ -254,9 +255,8 @@ class Equations(Scene):
             self.wait()
             self.play(Uncreate(hrc), Uncreate(hrf))
             self.play(Indicate(div_code[0][-3:]))
-            self.play(
-                ReplacementTransform(div_code[0][-3:].copy(), target_exp),
-                FadeOut(old_exp))
+            self.play(ReplacementTransform(div_code[0][-3:].copy(), target_exp),
+                      FadeOut(old_exp))
 
         highlight_and_switch_exp(of4[2], of3[2])
         tmp_of4_right = VGroup(of4[4].copy(), of4[5].copy())
@@ -296,7 +296,8 @@ class Equations(Scene):
         # Transform to code
         code_scale = 0.7
         power2_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static int power2(int x, int n) {
                 if (n == 0) {
                     return 1;
@@ -307,15 +308,17 @@ class Equations(Scene):
                 }
                 return t * t * x;
             }	
-            """).scale(code_scale)
+            """,
+            code_scale=code_scale,
+        )
         power2_code.to_edge(RIGHT)
 
         ef3.generate_target()
         of4.generate_target()
-        ef3.target.next_to(power2_code.code_string().get_line(7),
+        ef3.target.next_to(power2_code.get_code().get_lines(7),
                            LEFT,
                            buff=LARGE_BUFF)
-        of4.target.next_to(power2_code.code_string().get_line(9),
+        of4.target.next_to(power2_code.get_code().get_lines(9),
                            LEFT,
                            buff=LARGE_BUFF)
         ef3.target.next_to(of4.target,
@@ -343,24 +346,23 @@ class Equations(Scene):
         highlights = [
             [
                 SurroundingRectangle(
-                    power2_code.code_string().get_line(1)[-6:-2]),
+                    power2_code.get_code().get_lines(1)[-6:-2]),
                 SurroundingRectangle(
-                    power2_code.code_string().get_line(5)[-5:-2]),
+                    power2_code.get_code().get_lines(5)[-5:-2]),
                 SurroundingRectangle(ef3[-1]),
             ],
             [
-                SurroundingRectangle(
-                    power2_code.code_string().get_line(5)[5:-1]),
+                SurroundingRectangle(power2_code.get_code().get_lines(5)[5:-1]),
                 SurroundingRectangle(ef3[-2:]),
             ],
             [
                 SurroundingRectangle(
-                    power2_code.code_string().get_line(7)[-4:-1]),
+                    power2_code.get_code().get_lines(7)[-4:-1]),
                 SurroundingRectangle(ef3[1:]),
             ],
             [
                 SurroundingRectangle(
-                    power2_code.code_string().get_line(9)[-6:-1]),
+                    power2_code.get_code().get_lines(9)[-6:-1]),
                 SurroundingRectangle(of4[1:]),
             ],
         ]
@@ -379,10 +381,12 @@ class Equations(Scene):
 
 
 class RunPower2(Scene):
+
     def construct(self):
         code_scale = 0.7
         power2_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static int power2(int x, int n) {
                 if (n == 0) {
                     return 1;
@@ -393,12 +397,13 @@ class RunPower2(Scene):
                 }
                 return t * t * x;
             }	
-            """).scale(code_scale)
+            """,
+            code_scale=code_scale,
+        )
         power2_code.to_edge(UP)
         self.add(power2_code)
 
-        t1 = TextMobject(
-            "This version should call itself fewer than $n$ times")
+        t1 = TextMobject("This version should call itself fewer than $n$ times")
         t1.next_to(power2_code, DOWN, buff=LARGE_BUFF)
         self.play(FadeInFromDown(t1))
         self.wait(duration=2.5)
@@ -431,14 +436,15 @@ class RunPower2(Scene):
             }
             """,
             line_offset=10,
-        ).scale(code_scale - 0.1)
+            code_scale=code_scale - 0.1,
+        )
         frame_width = 3.5
         main_frame = StackFrame(main_code,
                                 'main()',
-                                2, ['y'],
+                                12, ['y'],
                                 width=frame_width,
                                 slot_char_width=8)
-        main_code.highlight_lines(2)
+        main_code.highlight_lines(12)
         VGroup(main_code, main_frame).arrange(RIGHT,
                                               buff=LARGE_BUFF).to_edge(DOWN)
         self.play(
@@ -507,7 +513,7 @@ class RunPower2(Scene):
 
         result = call_power2(2, 30, CallStack(main_frame), call_counter)
         self.play(
-            *main_frame.get_update_line_anims(3),
+            *main_frame.get_update_line_anims(13),
             main_frame.update_slot,
             'y',
             result,
@@ -531,6 +537,7 @@ class RunPower2(Scene):
 
 
 class Log2(Scene):
+
     def construct(self):
         t1 = TextMobject(
             'We got our answer in just 5 recursive calls!').set_color(YELLOW)
@@ -663,33 +670,33 @@ class Log2(Scene):
 class Log2Graph(GraphScene):
     CONFIG = {
         "x_axis_label":
-        "$n$",
+            "$n$",
         "y_axis_label":
-        "$time$",
+            "$time$",
         "x_axis_width":
-        FRAME_HEIGHT,
+            FRAME_HEIGHT,
         "y_axis_height":
-        FRAME_HEIGHT / 2,
+            FRAME_HEIGHT / 2,
         "y_max":
-        50,
+            50,
         "y_min":
-        0,
+            0,
         "x_max":
-        100,
+            100,
         "x_min":
-        0,
+            0,
         "x_labeled_nums": [50, 100],
         "y_labeled_nums":
-        range(0, 51, 10),
+            range(0, 51, 10),
         "y_tick_frequency":
-        10,
+            10,
         "x_tick_frequency":
-        10,
+            10,
         "axes_color":
-        BLUE,
+            BLUE,
         "graph_origin":
-        np.array(
-            (-FRAME_X_RADIUS + LARGE_BUFF, -FRAME_Y_RADIUS + LARGE_BUFF, 0))
+            np.array(
+                (-FRAME_X_RADIUS + LARGE_BUFF, -FRAME_Y_RADIUS + LARGE_BUFF, 0))
     }
 
     def construct(self):
@@ -736,6 +743,7 @@ class Log2Graph(GraphScene):
 
 
 class EqsOld(Scene):
+
     def construct(self):
         # Even case
         ef0 = TexMobject('x^n=', 'x', '\\times', 'x \\times ... \\times x')
@@ -878,7 +886,8 @@ class EqsOld(Scene):
         # Transform to code
         code_scale = 0.7
         power2_code = CodeBlock(
-            'Java', r"""
+            'Java',
+            r"""
             public static int power2(int x, int n) {
                 if (n == 0) {
                     return 1;
@@ -889,21 +898,20 @@ class EqsOld(Scene):
                 }
                 return t * t * x;
             }	
-            """).scale(code_scale)
+            """,
+            code_scale=code_scale,
+        )
         power2_code.to_edge(RIGHT)
 
         ef3.generate_target()
         of2.generate_target()
-        ef3.target.next_to(power2_code.code_string().get_line(7),
+        ef3.target.next_to(power2_code.get_code().get_lines(7),
                            LEFT,
                            buff=LARGE_BUFF)
-        of2.target.next_to(power2_code.code_string().get_line(9),
+        of2.target.next_to(power2_code.get_code().get_lines(9),
                            LEFT,
                            buff=LARGE_BUFF)
-        ef3.target.next_to(of2.target,
-                           UP,
-                           aligned_edge=RIGHT,
-                           coor_mask=X_AXIS)
+        ef3.target.next_to(of2.target, UP, aligned_edge=RIGHT, coor_mask=X_AXIS)
 
         et = TextMobject('\\textit{even:}')
         ot = TextMobject('\\textit{odd:}')
@@ -923,15 +931,13 @@ class EqsOld(Scene):
         self.wait()
 
         recursive_call_hr = SurroundingRectangle(
-            power2_code.code_string().get_line(5)[5:-1])
+            power2_code.get_code().get_lines(5)[5:-1])
         xn2_hr = SurroundingRectangle(ef3[-1])
 
-        ec_hr = SurroundingRectangle(
-            power2_code.code_string().get_line(7)[-4:-1])
+        ec_hr = SurroundingRectangle(power2_code.get_code().get_lines(7)[-4:-1])
         ef_hr = SurroundingRectangle(ef3[1:])
 
-        oc_hr = SurroundingRectangle(
-            power2_code.code_string().get_line(9)[-6:-1])
+        oc_hr = SurroundingRectangle(power2_code.get_code().get_lines(9)[-6:-1])
         of_hr = SurroundingRectangle(of2[1:])
 
         for f, c in [(xn2_hr, recursive_call_hr), (ef_hr, ec_hr),

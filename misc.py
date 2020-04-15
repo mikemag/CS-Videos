@@ -231,7 +231,7 @@ class CodeBlockSteppingDemo(Scene):
                   'n: %d' % n)
 
         xi = foo_code.pre_return(main_code, 1)
-        self.play(*bar_code.get_control_transfer_clockwise(xi))
+        self.play(*foo_code.get_control_transfer_clockwise(xi))
         main_code.post_control_transfer(xi, self)
 
         self.play(FadeOut(title), FadeOut(foo_code), FadeOut(bar_code))

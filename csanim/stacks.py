@@ -41,7 +41,7 @@ class StackFrame(VGroup):
             self.slot_map[
                 vn] = i  # Can't remember slot objs because they may change over time
         slots.arrange(DOWN, center=False, buff=0, aligned_edge=RIGHT)
-        func_label = TextMobject(func_label + ' line: ', str(line + self.code.line_offset)) \
+        func_label = TextMobject(func_label + ' line: ', str(line)) \
             .scale(self.text_scale).next_to(slots, UP, buff=SMALL_BUFF)
         self.add(slots, func_label)
         self.center()
@@ -78,9 +78,7 @@ class StackFrame(VGroup):
 
     def set_line(self, line):
         t = self.header_line()[1]
-        t.become(
-            TextMobject(str(line + self.code.line_offset)).scale(
-                self.text_scale).move_to(t))
+        t.become(TextMobject(str(line)).scale(self.text_scale).move_to(t))
         self.line = line
         return self
 
@@ -104,13 +102,14 @@ class StackFrame(VGroup):
         # There is something I've missed wrt the frame holding the code, and when copies are
         # made during animation. Possibly my copy/align_data impls are wrong. Need to dig in more.
         return [
-            AnimationGroup(ApplyMethod(self.code.highlight_lines, line), ),
+            AnimationGroup(ApplyMethod(self.code.highlight_lines, line),),
             self.set_line,
             line,
         ]
 
 
 class CallStack(VGroup):
+
     def animate_call(self, new_frame, scene, extra_anims=None):
         extra_anims = [] if extra_anims is None else extra_anims
         if len(self) > 2:
@@ -119,24 +118,14 @@ class CallStack(VGroup):
                             DOWN * new_frame.get_height() + DOWN * SMALL_BUFF))
         new_frame.next_to(self[-1], UP, buff=SMALL_BUFF)
         prev_code = self[-1].code
-        if prev_code != new_frame.code:
-            hr_caller, hr_callee = prev_code.setup_for_call(new_frame.code, 1)
-            scene.play(
-                *extra_anims,
-                prev_code.highlight_caller,
-                ReplacementTransform(hr_caller, hr_callee, path_arc=-np.pi),
-                FadeInFrom(new_frame, UP),
-                MaintainPositionRelativeTo(new_frame, self[-1]),
-            )
-            new_frame.code.complete_callee(hr_callee, self)
-        else:
-            scene.play(
-                *extra_anims,
-                new_frame.code.highlight_lines,
-                1,
-                FadeInFrom(new_frame, UP),
-                MaintainPositionRelativeTo(new_frame, self[-1]),
-            )
+        xi = prev_code.pre_call(new_frame.code, 1)
+        scene.play(
+            *extra_anims,
+            *prev_code.get_control_transfer_counterclockwise(xi),
+            FadeInFrom(new_frame, UP),
+            MaintainPositionRelativeTo(new_frame, self[-1]),
+        )
+        new_frame.code.post_control_transfer(xi, scene)
         self.add(new_frame)
 
     def animate_return(self, scene):
@@ -148,19 +137,10 @@ class CallStack(VGroup):
                 ApplyMethod(self.shift,
                             UP * current_frame.get_height() + UP * SMALL_BUFF))
         caller_frame = self[-1]
-        if caller_frame.code != current_frame.code:
-            hr_returner, hr_returnee = current_frame.code.setup_for_return(
-                caller_frame.code)
-            scene.play(
-                ReplacementTransform(hr_returner, hr_returnee, path_arc=np.pi),
-                caller_frame.code.highlight_returnee,
-                FadeOutAndShift(current_frame, UP),
-            )
-            caller_frame.code.complete_returnee(hr_returnee, self)
-        else:
-            scene.play(
-                *anim_stack_shift,
-                FadeOutAndShift(current_frame, UP),
-                caller_frame.code.highlight_lines,
-                caller_frame.line,
-            )
+        xi = current_frame.code.pre_return(caller_frame.code, caller_frame.line)
+        scene.play(
+            *current_frame.code.get_control_transfer_clockwise(xi),
+            *anim_stack_shift,
+            FadeOutAndShift(current_frame, UP),
+        )
+        caller_frame.code.post_control_transfer(xi, scene)
