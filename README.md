@@ -46,15 +46,28 @@ python manim.py example_scenes.py
 
 ## Useful Resources
 
-Useful tutorials, example projects, etc.
+Best on Manim:
 
-* https://github.com/Elteoremadebeethoven/AnimationsWithManim
+* The best source of info to-date: https://github.com/Elteoremadebeethoven/AnimationsWithManim
+  * She also runs a [r/mainm on Reddit](https://www.reddit.com/r/manim/) and a [Manim Discord](https://discordapp.com/invite/mMRrZQW).
+* I also like to check out the projects under from_3b1b/active for examples
+* Active Manim development is taking place on the shaders branch, and that's where you can find the source to his
+current videos, but the API in the shaders branch is in flux and has been quite buggy in my experience, so I've been
+sticking with the master branch.
+
+On TeX/LaTeX:
+
+Manim assumes you know LaTeX, but many may be new to this. Overleaf has a really nice [guide and knowledgebase](https://www.overleaf.com/learn/latex/Main_Page)
+for it that I've been using to refresh my memory **a lot**. I've never used their tool
+but this reference site is excellent.
+
+Finally, random Manim projects for examples:
+
 * https://talkingphysics.wordpress.com/2019/01/08/getting-started-animating-with-manim-and-python-3-7/
 * https://github.com/cpvrlab/SLProject/tree/rasterization-animation/rasterization-animation
 * https://github.com/pedrovhb/manim/blob/master/animacoes_pedro/bfs.py
 * https://github.com/cpvrlab/SLProject/blob/rasterization-animation/rasterization-animation/pixel_screen.py
 * https://www.reddit.com/r/manim/comments/f9h098/just_created_my_first_animation_with_manim/
-* https://www.overleaf.com/learn/latex/Code_listing
 
 ## License
 
