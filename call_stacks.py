@@ -773,22 +773,52 @@ class FACClosing(Scene):
                         label_constructor=TextMobject,
                         label_scale=text_scale)
 
-        push_up = TextMobject('Calls push frames').scale(text_scale)
+        notes = VGroup(b1, b5, b3, b4)
+
+        box_count = 8
+        colors = color_gradient([BLUE, ORANGE], box_count)
+        little_boxes = VGroup(*[
+            Rectangle(height=0.25, width=0.75, fill_opacity=1, color=colors[i])
+            for i in range(box_count)
+        ])
+        little_boxes.arrange(UP, buff=0.1)
+
+        push_up = TextMobject('Calls push\\\\frames').scale(text_scale)
+        push_up.next_to(little_boxes, DOWN)
         pua = Arrow(push_up.get_bottom(), push_up.get_top()).scale(2)
         pua.next_to(push_up, LEFT)
         pug = VGroup(push_up, pua)
-        # pug.next_to(foo_frame, LEFT)
-        pug.to_edge(LEFT).shift(DOWN)
-        pop_down = TextMobject('Returns pop frames').scale(text_scale)
+
+        pop_down = TextMobject('Returns pop\\\\frames').scale(text_scale)
+        pop_down.next_to(little_boxes, UP)
         pda = Arrow(pop_down.get_top(), pop_down.get_bottom()).scale(2)
         pda.next_to(pop_down, RIGHT)
         pdg = VGroup(pop_down, pda)
-        # pdg.next_to(foo_frame, RIGHT)
-        pdg.to_edge(RIGHT).shift(DOWN)
 
-        notes = VGroup(b1, pug, pdg, b5, b3, b4)
-        self.play(LaggedStartMap(ShowCreation, notes, lag_ratio=0.7),
-                  run_time=3)
+        bg = VGroup(little_boxes, pug, pdg)
+        bg.to_edge(DR, buff=MED_LARGE_BUFF)
+
+        self.play(
+            LaggedStartMap(ShowCreation, notes, lag_ratio=0.7, run_time=3.0))
+        self.play(
+            FadeIn(pug),
+            LaggedStartMap(FadeInFrom,
+                           little_boxes,
+                           lambda m: (m, RIGHT),
+                           lag_ratio=1.0,
+                           run_time=3.0))
+        self.play(FadeIn(pdg))
+        pdg.generate_target()
+        pdg.target.next_to(little_boxes[3], UP,
+                           submobject_to_align=pdg[0]).set_opacity(1.0)
+        self.play(
+            MoveToTarget(pdg, run_time=3.0),
+            LaggedStartMap(FadeOutAndShift,
+                           VGroup(*list(reversed(little_boxes))[:4]),
+                           lambda m: (m, RIGHT),
+                           lag_ratio=1.0,
+                           run_time=2.0),
+        )
         self.wait(duration=5)
 
 
