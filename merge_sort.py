@@ -1,6 +1,7 @@
 from manimlib.imports import *
 
 from cs_education.csanim.arrays import Array, ArrayIndex
+from cs_education.end_scene import EndScene
 
 
 # Base class for all merge sort scenes, with support for a basic merge viz, and multi-level merge viz.
@@ -645,7 +646,7 @@ class Merge4(MergeSortScenes):
 # - On the next level, the last pair is combined with the single leftover from the last level.
 # - On the next level, the last array of three is left over, so we bring it to the next level again.
 # - Etc, until the entire set is merged.
-class Merge11(MergeSortScenes):
+class Merge11(MergeSortScenes, EndScene):
 
     def __init__(self, **kwargs):
         self.runtime_stack = []
@@ -768,9 +769,16 @@ class Merge11(MergeSortScenes):
             FadeInFromDown(ttf_g),
             FadeInFromDown(dfl_g),
         )
+        self.wait(duration=5)
 
-        # self.play(*[FadeOut(mob) for mob in self.mobjects])
-        self.wait()
+        end_scale_group = VGroup(*[
+            mob for mob in self.mobjects if not isinstance(mob, ValueTracker)
+        ])
+        end_fade_group = VGroup()
+        self.animate_yt_end_screen(end_scale_group,
+                                   end_fade_group,
+                                   end_scale=0.61,
+                                   show_rects=False)
 
     def setup_animate_merge(self, left, right, merged):
         left_l = left.create_index(0, color=YELLOW, name='l', show_label=False)

@@ -2,6 +2,7 @@ from manimlib.imports import *
 
 from cs_education.csanim.code import CodeTextString, CodeBlock
 from cs_education.csanim.stacks import StackFrame
+from cs_education.end_scene import EndScene
 
 
 class FACIntro(Scene):
@@ -717,7 +718,7 @@ class FACHarderOne(Scene):
         self.wait()
 
 
-class FACClosing(Scene):
+class FACClosing(EndScene):
 
     def construct(self):
         title = TextMobject('The Call Stack').to_edge(UP)
@@ -741,9 +742,11 @@ class FACClosing(Scene):
         main_frame.to_edge(DOWN)
         foo_frame.next_to(main_frame, UP)
         bar_frame.next_to(foo_frame, UP)
+        frame_group = VGroup(main_frame, foo_frame, bar_frame)
         self.play(
             LaggedStartMap(FadeInFrom,
-                           VGroup(main_frame, foo_frame, bar_frame),
+                           frame_group,
+                           group=frame_group,
                            direction=UP,
                            lag_ratio=0.5))
         self.wait()
@@ -796,10 +799,14 @@ class FACClosing(Scene):
         pdg = VGroup(pop_down, pda)
 
         bg = VGroup(little_boxes, pug, pdg)
-        bg.to_edge(DR, buff=MED_LARGE_BUFF)
+        bg.to_edge(RIGHT, buff=MED_LARGE_BUFF)
 
         self.play(
-            LaggedStartMap(ShowCreation, notes, lag_ratio=0.7, run_time=3.0))
+            LaggedStartMap(ShowCreation,
+                           notes,
+                           group=notes,
+                           lag_ratio=0.7,
+                           run_time=3.0))
         self.play(
             FadeIn(pug),
             LaggedStartMap(FadeInFrom,
@@ -820,6 +827,13 @@ class FACClosing(Scene):
                            run_time=2.0),
         )
         self.wait(duration=5)
+
+        end_scale_group = VGroup(*self.mobjects)
+        end_fade_group = VGroup(title)
+        self.animate_yt_end_screen(end_scale_group,
+                                   end_fade_group,
+                                   show_elements=False,
+                                   show_rects=False)
 
 
 class Misc(Scene):

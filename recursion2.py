@@ -2,6 +2,7 @@ from manimlib.imports import *
 
 from cs_education.csanim.code import CodeBlock, CodeTextString
 from cs_education.csanim.stacks import StackFrame, CallStack
+from cs_education.end_scene import EndScene
 
 
 class Intro(Scene):
@@ -667,7 +668,7 @@ class Log2(Scene):
         self.play(*[FadeOut(o) for o in self.mobjects])
 
 
-class Log2Graph(GraphScene):
+class Log2Graph(GraphScene, EndScene):
     CONFIG = {
         "x_axis_label":
             "$n$",
@@ -740,6 +741,12 @@ class Log2Graph(GraphScene):
                   ShowCreation(olog2nl),
                   run_time=3)
         self.wait(duration=5)
+
+        end_scale_group = VGroup(*self.mobjects)
+        end_fade_group = VGroup()
+        self.animate_yt_end_screen(end_scale_group,
+                                   end_fade_group,
+                                   show_elements=False)
 
 
 class EqsOld(Scene):
