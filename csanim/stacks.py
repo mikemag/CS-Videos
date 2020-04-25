@@ -110,9 +110,13 @@ class StackFrame(VGroup):
 
 class CallStack(VGroup):
 
+    CONFIG = {
+        'scroll_height': 2,
+    }
+
     def animate_call(self, new_frame, scene, extra_anims=None):
         extra_anims = [] if extra_anims is None else extra_anims
-        if len(self) > 2:
+        if len(self) > self.scroll_height:
             extra_anims.append(
                 ApplyMethod(self.shift,
                             DOWN * new_frame.get_height() + DOWN * SMALL_BUFF))
@@ -128,19 +132,20 @@ class CallStack(VGroup):
         new_frame.code.post_control_transfer(xi, scene)
         self.add(new_frame)
 
-    def animate_return(self, scene):
+    def animate_return(self, scene, extra_anims=None):
+        extra_anims = [] if extra_anims is None else extra_anims
         current_frame = self[-1]
         self.remove(current_frame)
-        anim_stack_shift = []
-        if len(self) > 2:
-            anim_stack_shift.append(
+        if len(self) > self.scroll_height:
+            extra_anims.append(
                 ApplyMethod(self.shift,
                             UP * current_frame.get_height() + UP * SMALL_BUFF))
         caller_frame = self[-1]
         xi = current_frame.code.pre_return(caller_frame.code, caller_frame.line)
         scene.play(
             *current_frame.code.get_control_transfer_clockwise(xi),
-            *anim_stack_shift,
+            *extra_anims,
             FadeOutAndShift(current_frame, UP),
+            MaintainPositionRelativeTo(current_frame, self[-1]),
         )
         caller_frame.code.post_control_transfer(xi, scene)
