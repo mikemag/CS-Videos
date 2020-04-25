@@ -154,87 +154,6 @@ class CodeTextString(SingleStringTexMobject):
         return r
 
 
-# TODO: delete soon
-class CodeBlockOld(VGroup):
-    """
-    A block of code with line highlighting.
-
-    Hold a (possibly multiline) snippet of code in a given language,
-    with support for highlighting lines and stepping between them, animating
-    the highlight.
-    """
-
-    CONFIG = {
-        'height': 1,
-    }
-
-    def __init__(self, language, raw_code_string, line_offset=0, **kwargs):
-        digest_config(self, kwargs, locals())
-        super().__init__(**kwargs)
-        self.callsite_highlight = None
-        self.line_offset = line_offset
-        code_string = CodeTextString(language, raw_code_string)
-        highlight_rect = code_string.get_line_highlight_rect(1).set_opacity(0)
-        hrg = VGroup(highlight_rect)
-        self.add(code_string, hrg)
-
-    def code_string(self):
-        return self[0]
-
-    def __highlight_rect_group(self):
-        return self[1]
-
-    def highlight_rect(self):
-        return self.__highlight_rect_group()[0]
-
-    def highlight_lines(self, lines, color=YELLOW):
-        r = self.code_string().get_line_highlight_rect(lines, color=color)
-        self.highlight_rect().become(r)
-        return self
-
-    def fade_out_highlight(self):
-        self.highlight_rect().set_opacity(0)
-
-    # Move it without changing it
-    def move_highlight_rect(self, line):
-        self.highlight_rect().move_to(
-            self.code_string().get_line_highlight_rect(line))
-
-    # Returns a from and to highlight rect, each of which are independent of
-    # the code block
-    def setup_for_call(self, callee, lines):
-        hr_from = self.highlight_rect().copy()
-        self.callsite_highlight = self.highlight_rect().copy().set_color(WHITE)
-        self.highlight_rect().set_opacity(0)
-        hr_to = callee.code_string().get_line_highlight_rect(lines)
-        return hr_from, hr_to
-
-    def highlight_caller(self):
-        self.highlight_rect().become(self.callsite_highlight)
-
-    def complete_callee(self, hr, scene):
-        scene.remove(hr)
-        self.__highlight_rect_group().remove(self.highlight_rect())
-        self.__highlight_rect_group().add(hr)
-
-    # Returns a from and to highlight rect, each of which are independent of the code block
-    def setup_for_return(self, returnee):
-        hr_to = returnee.highlight_rect().copy().set_color(YELLOW)
-        hr_from = self.highlight_rect().copy()
-        self.__highlight_rect_group().remove(self.highlight_rect())
-        self.__highlight_rect_group().add(
-            self.code_string().get_line_highlight_rect(1).set_opacity(0))
-        return hr_from, hr_to
-
-    def highlight_returnee(self):
-        self.highlight_rect().set_opacity(0)
-
-    def complete_returnee(self, hr, scene):
-        scene.remove(hr)
-        self.__highlight_rect_group().remove(self.highlight_rect())
-        self.__highlight_rect_group().add(hr)
-
-
 class CodeBlock(VGroup):
     """
     A block of code with line highlighting.
@@ -394,8 +313,13 @@ class CodeBlock(VGroup):
             'dst_code': dst_code,
         }
 
-        d = (srcr.get_center()[1] - dstr.get_center()[1]) / srcr.get_height()
-        if abs(d) < 3:
+        yd = abs(
+            (srcr.get_center()[1] - dstr.get_center()[1]) / srcr.get_height())
+        d = sum([x**2 for x in (srcr.get_center() - dstr.get_center())])**0.5
+
+        if yd > 10 or d > 7:
+            xfer_info['exaggerate_arc'] = 0.5
+        elif yd < 3:
             xfer_info['exaggerate_arc'] = 1.5
 
         return xfer_info
