@@ -5,7 +5,7 @@ concepts to high school students visually.
 I hope to illustrate concepts and algorithms that might benefit from some 
 visuals and animation, to better help students understand.
 
-I'm putting the videos up on my YouTube channel here: [youtube.com/TheMikemag](youtube.com/TheMikemag)
+I'm putting the videos up on my YouTube channel here: [https://youtube.com/TheMikemag](https://youtube.com/TheMikemag)
 
 I hope to keep these short (bite-sized, or is it byte-sized?) and largely silent.
 
@@ -16,7 +16,7 @@ his series of mathematics videos [https://www.youtube.com/channel/UCYO_jab_esuFR
 ## Manim Fork
 
 These videos require my slightly-modified fork of manim. Specifically, the
-`csvideos` branch: [https://github.com/mikemag/manim/commits/csvideos](https://github.com/mikemag/manim/commits/csvideos)
+`csvideos` branch: [https://github.com/mikemag/manim/tree/csvideos](https://github.com/mikemag/manim/tree/csvideos)
 
 The key differences are:
 1. Fixed BraceLabel
