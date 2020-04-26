@@ -5,18 +5,18 @@ concepts to high school students visually.
 I hope to illustrate concepts and algorithms that might benefit from some 
 visuals and animation, to better help students understand.
 
-I'm putting the videos up on my YouTube channel here: [youtube.com/TheMikemag]()
+I'm putting the videos up on my YouTube channel here: [youtube.com/TheMikemag](youtube.com/TheMikemag)
 
 I hope to keep these short (bite-sized, or is it byte-sized?) and largely silent.
 
 These videos are built using [Manim](https://github.com/3b1b/manim), 
 created by Grant Sanderson of [3blue1brown](https://www.3blue1brown.com/) for 
-his series of mathematics videos [https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw]() 
+his series of mathematics videos [https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw](https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw) 
 
 ## Manim Fork
 
 These videos require my slightly-modified fork of manim. Specifically, the
-`csvideos` branch: [https://github.com/mikemag/manim/commits/csvideos]()
+`csvideos` branch: [https://github.com/mikemag/manim/commits/csvideos](https://github.com/mikemag/manim/commits/csvideos)
 
 The key differences are:
 1. Fixed BraceLabel
