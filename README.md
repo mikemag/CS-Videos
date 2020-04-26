@@ -1,21 +1,28 @@
 # CS Education Videos using Manim
 
-This is the start of some CS education videos illustrating concepts and algorithms that might benefit from some 
-visuals and animation to better help students understand.
+This is the source for my CS education videos intended to explain various CS 
+concepts to high school students visually. 
+I hope to illustrate concepts and algorithms that might benefit from some 
+visuals and animation, to better help students understand.
 
-These are built using [Manim](https://github.com/3b1b/manim), created by Grant Sanderson of 
-[3blue1brown](https://www.3blue1brown.com/) for his series of mathematics videos.
+I'm putting the videos up on my YouTube channel here: [youtube.com/TheMikemag]()
 
-## Videos
+I hope to keep these short (bite-sized, or is it byte-sized?) and largely silent.
 
-I'll add links to completed videos as I publish them.
+These videos are built using [Manim](https://github.com/3b1b/manim), 
+created by Grant Sanderson of [3blue1brown](https://www.3blue1brown.com/) for 
+his series of mathematics videos [https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw]() 
 
-## Early Development
+## Manim Fork
 
-This is my first attempt building a video like this, and one using Manim. I consider everything here so far
-a prototype, early beta, etc. Take it all with a grain of salt.
+These videos require my slightly-modified fork of manim. Specifically, the
+`csvideos` branch: [https://github.com/mikemag/manim/commits/csvideos]()
 
-I do hope to factor out the useful classes for core concepts into a reusable library for others.
+The key differences are:
+1. Fixed BraceLabel
+1. Respecting fill colors when reading SVGs. This allows Pygments to color 
+source code.
+1. Updated TeX template to include Pygments styles and such.
 
 ## Setup
 

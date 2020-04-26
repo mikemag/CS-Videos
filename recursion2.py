@@ -1,8 +1,8 @@
 from manimlib.imports import *
 
-from cs_education.csanim.code import CodeBlock, CodeTextString
-from cs_education.csanim.stacks import StackFrame, CallStack
-from cs_education.end_scene import EndScene
+from csanim.code import CodeBlock, CodeTextString
+from csanim.stacks import StackFrame, CallStack
+from end_scene import EndScene
 
 
 class Intro(Scene):

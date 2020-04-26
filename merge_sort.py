@@ -1,7 +1,7 @@
 from manimlib.imports import *
 
-from cs_education.csanim.arrays import Array, ArrayIndex
-from cs_education.end_scene import EndScene
+from csanim.arrays import Array, ArrayIndex
+from end_scene import EndScene
 
 
 # Base class for all merge sort scenes, with support for a basic merge viz, and multi-level merge viz.

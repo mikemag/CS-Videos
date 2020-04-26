@@ -1,7 +1,7 @@
 from manimlib.imports import *
 
-from cs_education.csanim.code import CodeTextString, CodeBlock
-from cs_education.csanim.stacks import StackFrame
+from csanim.code import CodeTextString, CodeBlock
+from csanim.stacks import StackFrame
 
 
 # A single frame of all of the default colors, for reference.
