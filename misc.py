@@ -2,6 +2,94 @@ from manimlib.imports import *
 
 from csanim.code import CodeTextString, CodeBlock
 from csanim.stacks import StackFrame
+from csanim.trees import Tree
+
+
+class FibTree(Tree):
+
+    def __init__(self, n, parent, text_scale=1.0):
+        super().__init__(parent)
+        self.fib_n = n
+        self.result = 0
+
+        if parent is not None:
+            self.text_scale = parent.text_scale
+        else:
+            self.text_scale = text_scale
+        self.label = TextMobject("$F_{%d}$" % n).scale(self.text_scale)
+
+    def __str__(self):
+        return "F_" + str(self.fib_n) + " = " + str(self.result)
+
+
+class TreeDemoFib(Scene):
+
+    def construct(self):
+        fib_n = 6
+        text_scale = 0.75
+        tree = TreeDemoFib.build_fib_tree(fib_n, text_scale=text_scale)
+        tree.layout(1.0, 1.0)
+        g = tree.to_vgroup()
+        g.center().to_edge(UP)
+
+        self.play(FadeIn(tree.label))
+        ctx = {'current_rect': None, 'run_time': 1.0 if fib_n < 6 else 0.25}
+        self.run_fib(tree, ctx)
+        self.play(FadeOut(ctx['current_rect']))
+
+    @staticmethod
+    def build_fib_tree(n, parent=None, text_scale=1.0):
+        tree = FibTree(n, parent, text_scale)
+        if n == 0:
+            tree.result = 0
+            return tree
+        elif n == 1:
+            tree.result = 1
+            return tree
+        fn1 = TreeDemoFib.build_fib_tree(n - 1, tree)
+        fn2 = TreeDemoFib.build_fib_tree(n - 2, tree)
+        tree.result = fn1.result + fn2.result
+        return tree
+
+    def _update_rect(self, tree, ctx):
+        sr = SurroundingRectangle(tree.label)
+        if ctx['current_rect']:
+            parent_change_anims = []
+            if tree.parent is not None:
+                parent_change_anims = [tree.parent.label.set_color, ORANGE]
+            self.play(ReplacementTransform(ctx['current_rect'], sr),
+                      tree.label.set_color,
+                      YELLOW,
+                      *parent_change_anims,
+                      run_time=ctx['run_time'])
+        else:
+            self.play(ShowCreation(sr),
+                      tree.label.set_color,
+                      YELLOW,
+                      run_time=ctx['run_time'])
+        ctx['current_rect'] = sr
+
+    def run_fib(self, tree, ctx):
+        self._update_rect(tree, ctx)
+        if len(tree.children) > 0:
+            lc = tree.children[0]
+            rc = tree.children[1]
+            lc.label.set_color(BLUE)
+            rc.label.set_color(BLUE)
+            self.play(*[
+                FadeIn(o) for o in
+                [lc.label, lc.line_to_parent, rc.label, rc.line_to_parent]
+            ],
+                      run_time=ctx['run_time'])
+            self.run_fib(tree.children[0], ctx)
+            self._update_rect(tree, ctx)
+            self.run_fib(tree.children[1], ctx)
+            self._update_rect(tree, ctx)
+        rl = TexMobject(str(tree.result)).scale(tree.text_scale)
+        rl.move_to(tree.label)
+        rl.set_color(GREEN_SCREEN)
+        self.play(ReplacementTransform(tree.label, rl),
+                  run_time=ctx['run_time'])
 
 
 # A single frame of all of the default colors, for reference.
