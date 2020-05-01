@@ -127,7 +127,8 @@ class Array(VGroup):
         self.left_edge_offset = self.left_element_offset + self.hw
 
         # Add the outline of the array.
-        self.add(self.create_bounding_box())
+        self.outline = VGroup()
+        self.outline.add(self.create_bounding_box())
 
         # Add separators between the elements
         separators = VGroup()
@@ -136,7 +137,8 @@ class Array(VGroup):
             separators.add(
                 Line([x, -self.hh, 0], [x, self.hh, 0], stroke_width=2))
         separators.shift(LEFT * self.left_edge_offset)
-        self.add(separators)
+        self.outline.add(separators)
+        self.add(self.outline)
 
         # Add each element as a string, in order, spaced accordingly.
         self.elements = VGroup()
