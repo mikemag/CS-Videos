@@ -13,15 +13,14 @@ class S01MergeSort2Intro(Scene):
         self.play(ShowCreation(title))
         self.wait(duration=0.5)
 
-        t1 = TextMobject(
-            "Using recursion to divide the problem into base cases")
+        t1 = TextMobject("Divide-and-conquer with recursion")
         t1.shift(UP)
         self.play(ShowCreation(t1))
         self.wait(duration=2)
 
         t2 = TextMobject(
             "Watching the 3-part series of recursion videos first will help!")
-        t3 = TextMobject("\\textit{Links in the description}").scale(0.8)
+        t3 = TextMobject("\\textit{Video links in the description}").scale(0.8)
         t2.set_color(YELLOW)
         t3.set_color(YELLOW)
         t2.next_to(t1, DOWN, buff=LARGE_BUFF)
@@ -157,19 +156,15 @@ class MergeTreeBase(Scene):
             rc = tree.children[1]
             if be.code_visible:
                 self.highlight_lines(be, 7)
-                be.explain(be.split_left)
-                be.play(FadeIn(lc.label), FadeIn(lc.line_to_parent))
+                be.explain(be.split_left, child=lc)
 
                 self.highlight_lines(be, 8)
-                be.explain(be.split_right)
-                be.play(FadeIn(rc.label), FadeIn(rc.line_to_parent))
+                be.explain(be.split_right, child=rc)
                 be.play(be.code.highlight_lines, 9, be.code.set_annotation, 5,
                         None)
             else:
                 # Show them together once the code is gone
-                be.explain(be.split_both)
-                be.play(FadeIn(lc.label), FadeIn(lc.line_to_parent),
-                        FadeIn(rc.label), FadeIn(rc.line_to_parent))
+                be.explain(be.split_both, lc=lc, rc=rc)
 
             be.explain(be.recurse_left)
             self.run_merge_sort(lc, be, 9)
@@ -191,7 +186,7 @@ class MergeTreeBase(Scene):
             be.play(*self.get_return_rect_anims(tree, be))
 
     def do_merge(self, parent, left, right, be):
-        be.explain(be.merge_start)
+        be.explain(be.merge_start, parent=parent)
         self.play(FadeOut(parent.label.elements), run_time=be.merge_run_time)
         left.result_label.move_to(left.label)
         right.result_label.move_to(right.label)
@@ -245,7 +240,7 @@ class MergeExposition(BasilExposition):
     def split_right(self, scene, count, child=None):
         pass
 
-    def split_both(self, scene, count, child=None):
+    def split_both(self, scene, count, lc=None, rc=None):
         pass
 
     def recurse_left(self, scene, count):
@@ -257,7 +252,7 @@ class MergeExposition(BasilExposition):
     def base_case(self, scene, count):
         pass
 
-    def merge_start(self, scene, count):
+    def merge_start(self, scene, count, parent=None):
         pass
 
     def merge_end(self, scene, count):
@@ -290,17 +285,24 @@ class S02Merge8WithCode(MergeTreeBase):
             code_scale=code_scale,
         )
         ms_code.set_annotation(5, None)
-        ms_code.shift(UP)
-        t1 = TextMobject(
+
+        t1 = TextMobject("Recursive mergesort in Java")
+        t1.to_edge(UP)
+        ms_code.next_to(t1, DOWN, buff=MED_LARGE_BUFF)
+        self.play(FadeIn(t1))
+        self.play(
+            LaggedStartMap(FadeInFromDown, ms_code.get_code(), lag_ratio=0.2))
+        self.wait(duration=3.0)
+
+        t2 = TextMobject(
             "Let's trace through this and track our work with a tree",
             buff=LARGE_BUFF)
-        t1.next_to(ms_code, DOWN)
-        self.play(FadeInFromDown(ms_code))
-        self.wait()
-        self.play(FadeInFromDown(t1))
+        t2.next_to(ms_code, DOWN, buff=LARGE_BUFF)
+        self.play(FadeInFromDown(t2))
         self.wait(duration=3)
 
-        self.play(ms_code.to_edge, DR, FadeOutAndShiftDown(t1))
+        self.play(ms_code.to_edge, DR, FadeOutAndShiftDown(t2),
+                  FadeOutAndShift(t1, UP))
 
         colors = color_gradient([PINK, BLUE, YELLOW_D], 15)
         tree = build_merge_sort_tree(unsorted, text_scale=1.0)
@@ -328,7 +330,7 @@ class S02Merge8WithCode(MergeTreeBase):
         self.play(FadeInFromDown(t1))
         self.wait()
         self.play(FadeInFromDown(t2))
-        self.wait(duration=2)
+        self.wait(duration=3)
 
         t3 = TextMobject("We call this \\textit{divide-and-conquer}")
         t4 = TextMobject("\\textit{This is very common!} You'll see it a lot.")
@@ -338,7 +340,7 @@ class S02Merge8WithCode(MergeTreeBase):
         self.play(FadeInFromDown(t3))
         self.wait()
         self.play(FadeInFromDown(t4))
-        self.wait(duration=2)
+        self.wait(duration=3)
 
         t5 = TextMobject("This one was nicely balanced and even...")
         t6 = TextMobject("let's try one that's a little bit odd")
@@ -348,7 +350,7 @@ class S02Merge8WithCode(MergeTreeBase):
         self.play(FadeInFromDown(t5))
         self.wait()
         self.play(FadeInFromDown(t6))
-        self.wait(duration=2)
+        self.wait(duration=3)
 
         self.play(*[FadeOut(o) for o in self.mobjects])
 
@@ -378,22 +380,33 @@ class Merge8Exposition(MergeExposition):
         if count == 1:
             t1 = TextMobject("Split off the left half...")
             t1.next_to(self.code.get_lines(7), LEFT, buff=LARGE_BUFF)
-            self.deferred_play_next(FadeIn(t1))
-            self.deferred_wait(self.time + 1)
-            self.deferred_play(self.time + 4, FadeOut(t1))
+            self.play(FadeIn(t1))
+            self.play(FadeIn(child.label), FadeIn(child.line_to_parent))
+            self.play(Indicate(child.label))
+            self.deferred_play(self.time + 5, FadeOut(t1))
         elif count == 2:
             t1 = TextMobject("And again, split into halves")
             t1.next_to(self.code.get_lines(7), LEFT, buff=LARGE_BUFF)
-            self.deferred_play_next(FadeIn(t1))
-            self.deferred_play(self.time + 4, FadeOut(t1))
+            self.play(FadeIn(t1))
+            self.play(FadeIn(child.label), FadeIn(child.line_to_parent))
+            self.deferred_play(self.time + 3, FadeOut(t1))
+        else:
+            self.play(FadeIn(child.label), FadeIn(child.line_to_parent))
 
     def split_right(self, scene, count, child=None):
         if count == 1:
             t1 = TextMobject("... and the right half")
             t1.next_to(self.code.get_lines(9), LEFT, buff=LARGE_BUFF)
-            self.deferred_play_next(FadeIn(t1))
-            self.deferred_wait(self.time + 1)
-            self.deferred_play(self.time + 2, FadeOut(t1))
+            self.play(FadeIn(t1))
+            self.play(FadeIn(child.label), FadeIn(child.line_to_parent))
+            self.play(Indicate(child.label))
+            self.deferred_play(self.time + 1, FadeOut(t1))
+        else:
+            self.play(FadeIn(child.label), FadeIn(child.line_to_parent))
+
+    def split_both(self, scene, count, lc=None, rc=None):
+        self.play(FadeIn(lc.label), FadeIn(lc.line_to_parent), FadeIn(rc.label),
+                  FadeIn(rc.line_to_parent))
 
     def recurse_left(self, scene, count):
         if count == 1:
@@ -430,11 +443,13 @@ class Merge8Exposition(MergeExposition):
         if count == 1:
             t1 = TextMobject("We've hit a base case")
             t1.next_to(self.code.get_lines(7), LEFT, buff=LARGE_BUFF * 2)
-            t2 = TextMobject("Just return this single-element,\\\\sorted array")
+            t2 = TextMobject("So return this single-element,\\\\"
+                             "\\textit{sorted} array")
             t2.next_to(t1, DOWN, buff=MED_LARGE_BUFF)
             scene.play(FadeIn(t1))
             scene.wait()
             scene.play(FadeIn(t2))
+            scene.wait()
             self.deferred_play_next(FadeOut(t1), FadeOut(t2))
         elif count == 2:
             t1 = TextMobject("Again, we've hit the easy case")
@@ -447,12 +462,28 @@ class Merge8Exposition(MergeExposition):
         if self.code_visible:
             scene.wait()
 
-    def merge_start(self, scene, count):
+    def merge_start(self, scene, count, parent=None):
         if count == 1:
             t1 = TextMobject("Now we can merge\\\\the sorted halves")
             t1.next_to(self.code.get_lines(7), LEFT, buff=LARGE_BUFF * 2)
+            t2 = TextMobject("\\texttt{merge()} from the first video")
+            t2.scale(0.7).set_color(YELLOW)
+            t2.next_to(self.code.get_lines(11), LEFT, buff=LARGE_BUFF * 2)
+            l1 = Arrow(t2, self.code.get_current_highlight().get_left())
+            l1.set_color(YELLOW)
             scene.play(FadeIn(t1))
+            scene.wait()
+            scene.play(FadeIn(t2), ShowCreation(l1))
+            scene.wait()
+            scene.play(FadeOutAndShift(t2, UP), FadeOutAndShift(l1, UP))
+            scene.play(Indicate(parent.label, scale_factor=1.5))
             self.deferred_play_next(FadeOut(t1))
+            t3 = TextMobject("\\textit{* Find a link to Merge Sort Part I "
+                             "in the description}")
+            t3.scale(0.5).set_color(BLUE)
+            t3.to_edge(DR, buff=SMALL_BUFF)
+            self.deferred_play(self.time + 2, FadeIn(t3))
+            self.deferred_play(self.time + 40, FadeOut(t3))
         elif count == 2:
             t1 = TextMobject("Again, merge the\\\\sorted halves")
             t1.next_to(self.code.get_lines(7), LEFT, buff=LARGE_BUFF * 2)
@@ -477,12 +508,11 @@ class S03MergeOdd(MergeTreeBase, EndScene):
         be = MergeOddExposition(self, tree, None)
 
         t1 = TextMobject("Start with %d numbers this time" % n)
-        t1.next_to(tree.label, DOWN, buff=LARGE_BUFF * 2)
-        be.deferred_play(1, FadeIn(t1), run_time=1.0)
-        be.deferred_wait(1, duration=2)
-        be.deferred_play(3, FadeOut(t1))
+        t1.next_to(tree.label, DOWN, buff=LARGE_BUFF)
+        self.play(FadeIn(tree.label), FadeIn(t1))
+        self.wait(duration=2)
+        be.deferred_play_next(FadeOut(t1))
 
-        be.play(FadeIn(tree.label))
         self.run_merge_sort(tree, be, 0)
         self.wait()
 
@@ -510,15 +540,23 @@ class MergeOddExposition(MergeExposition):
         self.merge_run_time = 0.2
         self.leftovers = VGroup()
 
-    def split_both(self, scene, count, child=None):
+    def split_both(self, scene, count, lc=None, rc=None):
         if count == 1:
-            t1 = TextMobject("5 on the left and 6 on the right, which is fine")
-            t1.next_to(self.tree_root.label, DOWN, buff=LARGE_BUFF * 2)
-            self.deferred_play_next(FadeIn(t1), run_time=1.0)
-            self.deferred_wait(self.time + 1, duration=3)
-            self.deferred_play(self.time + 2, FadeOut(t1))
-        elif count == 2:
-            t1 = TextMobject("Another uneven split, still okay!")
+            scene.play(FadeIn(lc.label), FadeIn(lc.line_to_parent),
+                       FadeIn(rc.label), FadeIn(rc.line_to_parent))
+            bl = BraceLabel(lc.label,
+                            "5",
+                            brace_direction=DOWN)
+            br = BraceLabel(rc.label,
+                            "6",
+                            brace_direction=DOWN)
+            scene.play(FadeIn(bl), FadeIn(br))
+            scene.wait()
+            self.deferred_play(self.time + 1, FadeOut(bl), FadeOut(br))
+            return
+
+        if count == 2:
+            t1 = TextMobject("Another uneven split")
             t1.next_to(self.tree_root.label, DOWN, buff=LARGE_BUFF * 3)
             self.deferred_play_next(FadeIn(t1), run_time=1.0)
             self.deferred_wait(self.time + 1, duration=2)
@@ -538,7 +576,10 @@ class MergeOddExposition(MergeExposition):
             self.deferred_play_next(FadeInFromDown(t1), run_time=1.0)
             self.leftovers.add(t1)
 
-    def merge_start(self, scene, count):
+        self.play(FadeIn(lc.label), FadeIn(lc.line_to_parent), FadeIn(rc.label),
+                  FadeIn(rc.line_to_parent))
+
+    def merge_start(self, scene, count, parent=None):
         if count == 3:
             t1 = TextMobject("Merging doesn't care if the sides are even")
             t1.to_edge(DOWN, buff=LARGE_BUFF)
